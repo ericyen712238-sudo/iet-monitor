@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4971 IET-KY 即時看盤終端 | Level-2 專業盤勢監控</title>
+  <title>4971 IET-KY 即時看盤終端 | 技術線型與分點籌碼</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -13,9 +13,7 @@
         extend: {
           colors: {
             twRed: '#f43f5e',
-            twRedBg: 'rgba(244, 63, 94, 0.12)',
             twGreen: '#10b981',
-            twGreenBg: 'rgba(16, 185, 129, 0.12)',
             terminal: '#090d16',
             cardBg: '#0f172a'
           },
@@ -40,49 +38,48 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .depth-bar-bid {
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      background: linear-gradient(90deg, rgba(244, 63, 94, 0.03), rgba(244, 63, 94, 0.2));
+      transition: width 0.4s ease;
+      background: linear-gradient(90deg, rgba(244, 63, 94, 0.03), rgba(244, 63, 94, 0.22));
     }
     .depth-bar-ask {
-      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      background: linear-gradient(270deg, rgba(16, 185, 129, 0.03), rgba(16, 185, 129, 0.2));
+      transition: width 0.4s ease;
+      background: linear-gradient(270deg, rgba(16, 185, 129, 0.03), rgba(16, 185, 129, 0.22));
     }
     @keyframes pulse-ring {
       0% { transform: scale(0.9); opacity: 0.8; }
       50% { transform: scale(1.4); opacity: 0; }
       100% { transform: scale(0.9); opacity: 0; }
     }
-    .ping-ring {
-      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    .ping-ring { animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+    .tab-btn.active {
+      background: rgba(99, 102, 241, 0.18);
+      color: #818cf8;
+      border-color: rgba(129, 140, 248, 0.4);
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #0b0f19; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
   </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 antialiased selection:bg-rose-500/30">
+<body class="text-slate-100 min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 antialiased selection:bg-rose-500/30">
 
   <!-- Main Container -->
-  <div class="w-full max-w-2xl bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 sm:p-7 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] backdrop-blur-xl relative overflow-hidden">
+  <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800/80 rounded-3xl p-4 sm:p-7 shadow-2xl backdrop-blur-xl relative overflow-hidden space-y-5">
     
     <!-- Top Glow Line -->
     <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500/60 to-transparent"></div>
 
     <!-- Header Section -->
-    <div class="flex items-start justify-between pb-5 border-b border-slate-800/80">
+    <div class="flex items-start justify-between pb-4 border-b border-slate-800/80">
       <div>
-        <div class="flex items-center gap-2.5">
-          <span class="px-2.5 py-1 text-[11px] font-bold tracking-wider rounded-md bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-300 border border-purple-500/30">TPEx 上櫃</span>
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <span class="px-2.5 py-1 text-[11px] font-bold tracking-wider rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30">TPEx 上櫃</span>
           <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-baseline gap-2">
             4971 <span class="text-slate-200 text-xl font-bold">IET-KY</span>
           </h1>
-          <span class="text-xs text-slate-400 font-medium hidden sm:inline">英特磊科技 (III-V 族磊晶)</span>
+          <span class="text-xs text-slate-400 font-medium">英特磊科技 (III-V 族磊晶)</span>
         </div>
         <p class="text-xs text-slate-400 mt-1 flex items-center gap-2">
-          <span>官方 MIS 櫃買撮合</span>
+          <span>櫃買中心 MIS 官方即時撮合</span>
           <span class="text-slate-600">•</span>
-          <span id="latency-tag" class="text-slate-500 num-tabular">延遲 ~0.3s</span>
+          <span id="latency-tag" class="text-slate-400 num-tabular">延遲 ~0.3s</span>
         </p>
       </div>
 
@@ -99,17 +96,19 @@
       </div>
     </div>
 
-    <!-- Hero Price Card (TradingView / Bloomberg Style) -->
-    <div class="my-5 p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-slate-950/80 to-slate-900/60 border border-slate-800/90 shadow-inner relative overflow-hidden">
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <!-- Hero Price & Five-tier Book Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      
+      <!-- Price Card (7 cols) -->
+      <div class="lg:col-span-7 p-5 rounded-2xl bg-gradient-to-b from-slate-950/90 to-slate-900/60 border border-slate-800 shadow-inner flex flex-col justify-between">
         <div>
-          <div class="text-[11px] uppercase tracking-widest font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
+          <div class="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
             <span>當前成交價 (TWD)</span>
             <span class="w-1 h-1 rounded-full bg-slate-600"></span>
-            <span class="text-slate-400">現價</span>
+            <span class="text-slate-400">現價撮合</span>
           </div>
           <div class="flex items-baseline gap-3 flex-wrap">
-            <span id="current-price" class="text-5xl sm:text-6xl font-black tracking-tighter num-tabular text-rose-500 drop-shadow-[0_0_20px_rgba(244,63,94,0.25)]">621.00</span>
+            <span id="current-price" class="text-5xl font-black tracking-tighter num-tabular text-rose-500 drop-shadow-[0_0_20px_rgba(244,63,94,0.3)]">621.00</span>
             <div class="flex items-center gap-2">
               <span id="price-change" class="text-2xl font-bold num-tabular text-rose-400">+16.00</span>
               <span id="change-percent" class="text-sm font-bold num-tabular px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30">+2.64%</span>
@@ -117,133 +116,201 @@
           </div>
         </div>
 
-        <div class="flex sm:flex-col justify-between sm:text-right border-t sm:border-t-0 border-slate-800 pt-3 sm:pt-0 gap-1.5 text-xs">
+        <!-- Metrics Row -->
+        <div class="grid grid-cols-3 gap-2 pt-4 mt-4 border-t border-slate-800/80 text-xs">
           <div>
-            <span class="text-slate-400">總成交量</span>
-            <span id="total-volume" class="ml-2 font-bold text-white num-tabular text-base">2,392</span> <span class="text-slate-400">張</span>
+            <span class="text-slate-400 block text-[11px]">總成交量</span>
+            <span class="text-white font-bold num-tabular text-sm"><span id="total-volume">2,392</span> 張</span>
           </div>
           <div>
-            <span class="text-slate-400">最後單筆</span>
-            <span id="single-volume" class="ml-2 font-bold text-rose-400 num-tabular text-base">114</span> <span class="text-slate-400">張</span>
+            <span class="text-slate-400 block text-[11px]">最後單筆</span>
+            <span class="text-rose-400 font-bold num-tabular text-sm"><span id="single-volume">114</span> 張</span>
           </div>
           <div>
-            <span class="text-slate-400">預估金額</span>
-            <span id="est-amount" class="ml-2 font-semibold text-slate-300 num-tabular">~14.85 億</span>
+            <span class="text-slate-400 block text-[11px]">預估金額</span>
+            <span id="est-amount" class="text-slate-300 font-semibold num-tabular text-sm">~14.85 億</span>
+          </div>
+        </div>
+
+        <!-- High-Low Range Bar -->
+        <div class="mt-4 pt-3 border-t border-slate-800/80">
+          <div class="flex justify-between text-[11px] font-medium text-slate-400 mb-1.5 num-tabular">
+            <span>最低 <strong id="bar-low" class="text-emerald-400">606.00</strong></span>
+            <span>高低振幅 <strong id="range-spread" class="text-slate-300">9.59%</strong></span>
+            <span>最高 <strong id="bar-high" class="text-rose-400">664.00</strong></span>
+          </div>
+          <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/40 via-amber-500/40 to-rose-500/40"></div>
+            <div id="price-slider-pin" class="absolute top-0 bottom-0 w-2.5 bg-white rounded-full shadow-[0_0_8px_white] -ml-1 transition-all duration-500" style="left: 25.86%;"></div>
           </div>
         </div>
       </div>
 
-      <!-- Intraday High-Low Range Bar -->
-      <div class="mt-6 pt-4 border-t border-slate-800/80">
-        <div class="flex justify-between text-[11px] font-medium text-slate-400 mb-1.5 num-tabular">
-          <span>最低 <strong id="bar-low" class="text-emerald-400">606.00</strong></span>
-          <span class="text-slate-400">今日高低振幅 <strong id="range-spread" class="text-slate-300">9.59%</strong></span>
-          <span>最高 <strong id="bar-high" class="text-rose-400">664.00</strong></span>
+      <!-- Five Order Book (5 cols) -->
+      <div class="lg:col-span-5 border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/60 flex flex-col justify-between">
+        <div class="bg-slate-950/80 px-3.5 py-2 border-b border-slate-800 flex items-center justify-between text-[11px] font-semibold">
+          <span class="text-rose-400">買進委託 (Bid)</span>
+          <span class="text-slate-400">五檔掛單深度</span>
+          <span class="text-emerald-400">賣出委託 (Ask)</span>
         </div>
-        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden relative">
-          <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/40 via-amber-500/40 to-rose-500/40"></div>
-          <div id="price-slider-pin" class="absolute top-0 bottom-0 w-2.5 bg-white rounded-full shadow-[0_0_8px_white] -ml-1 transition-all duration-500" style="left: 25.86%;"></div>
+
+        <div class="grid grid-cols-2 divide-x divide-slate-800/80 num-tabular text-xs">
+          <!-- Bid Table -->
+          <div id="bid-container" class="divide-y divide-slate-800/40">
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 4%;"></div><span class="font-bold text-rose-400 z-10">620.00</span><span class="text-slate-300 z-10 font-semibold">1</span></div>
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 4%;"></div><span class="font-bold text-rose-400 z-10">617.00</span><span class="text-slate-300 z-10 font-semibold">1</span></div>
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 24%;"></div><span class="font-bold text-rose-400 z-10">615.00</span><span class="text-slate-300 z-10 font-semibold">6</span></div>
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 100%;"></div><span class="font-bold text-rose-400 z-10">614.00</span><span class="text-slate-100 z-10 font-bold">25</span></div>
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 16%;"></div><span class="font-bold text-rose-400 z-10">613.00</span><span class="text-slate-300 z-10 font-semibold">4</span></div>
+          </div>
+          <!-- Ask Table -->
+          <div id="ask-container" class="divide-y divide-slate-800/40">
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 20%;"></div><span class="text-slate-300 z-10 font-semibold">1</span><span class="font-bold text-emerald-400 z-10">621.00</span></div>
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 40%;"></div><span class="text-slate-300 z-10 font-semibold">2</span><span class="font-bold text-emerald-400 z-10">622.00</span></div>
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 100%;"></div><span class="text-slate-100 z-10 font-bold">5</span><span class="font-bold text-emerald-400 z-10">623.00</span></div>
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 60%;"></div><span class="text-slate-300 z-10 font-semibold">3</span><span class="font-bold text-emerald-400 z-10">625.00</span></div>
+            <div class="relative px-3 py-1.5 flex items-center justify-between"><div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 40%;"></div><span class="text-slate-300 z-10 font-semibold">2</span><span class="font-bold text-emerald-400 z-10">626.00</span></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/40 px-3 py-1.5 border-t border-slate-800 flex justify-between text-[11px] text-slate-400 num-tabular">
+          <span>昨收 <strong id="yesterday-close" class="text-slate-300">605.00</strong></span>
+          <span>開盤 <strong id="open-price" class="text-slate-300">634.00</strong></span>
+          <span>最高 <strong id="high-price" class="text-rose-400">664.00</strong></span>
+          <span>最低 <strong id="low-price" class="text-emerald-400">606.00</strong></span>
         </div>
       </div>
     </div>
 
-    <!-- Key Metrics Grid -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 text-xs">
-      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition">
-        <div class="text-slate-400 text-[11px]">昨收價 (Ref)</div>
-        <div id="yesterday-close" class="text-base font-bold num-tabular text-slate-200 mt-1">605.00</div>
+    <!-- Mode Selector Navigation Tabs -->
+    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 pt-1">
+      <div class="flex items-center gap-1.5">
+        <button id="tab-intraday" onclick="switchTab('intraday')" class="tab-btn active px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          即時分時走勢
+        </button>
+        <button id="tab-kline" onclick="switchTab('kline')" class="tab-btn px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          日 K 線圖 (MA均線)
+        </button>
+        <button id="tab-chips" onclick="switchTab('chips')" class="tab-btn px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/></svg>
+          券商分點 & 籌碼 CSV
+        </button>
       </div>
-      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition">
-        <div class="text-slate-400 text-[11px]">今日開盤</div>
-        <div id="open-price" class="text-base font-bold num-tabular text-rose-400 mt-1">634.00</div>
+
+      <span id="chart-legend-info" class="text-[11px] text-slate-400 hidden sm:inline num-tabular">
+        黃線: VWAP 均價線 | 白線: 即時價
+      </span>
+    </div>
+
+    <!-- TAB 1: Intraday Minute Chart -->
+    <div id="panel-intraday" class="space-y-2">
+      <div class="relative w-full h-[280px] bg-slate-950/80 border border-slate-800 rounded-2xl overflow-hidden p-2">
+        <canvas id="intradayCanvas" class="w-full h-full cursor-crosshair"></canvas>
       </div>
-      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition">
-        <div class="text-slate-400 text-[11px]">最高盤價</div>
-        <div id="high-price" class="text-base font-bold num-tabular text-rose-400 mt-1">664.00</div>
-      </div>
-      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition">
-        <div class="text-slate-400 text-[11px]">最低盤價</div>
-        <div id="low-price" class="text-base font-bold num-tabular text-emerald-400 mt-1">606.00</div>
+      <div class="flex justify-between items-center text-[11px] text-slate-400 px-1">
+        <span>開盤 09:00</span>
+        <span>昨收基準線: 605.00</span>
+        <span>收盤 13:30</span>
       </div>
     </div>
 
-    <!-- Level-2 Depth Order Book (五檔買賣量能視覺化) -->
-    <div class="border border-slate-800 rounded-2xl overflow-hidden mb-5 bg-slate-950/50 shadow-lg">
-      <div class="bg-slate-950/80 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between text-xs font-semibold">
-        <span class="flex items-center gap-1.5 text-rose-400">
-          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-          買進委託 (Bid) 五檔
-        </span>
-        <span class="text-slate-400 text-[11px]">Level-2 撮合委託量能條</span>
-        <span class="flex items-center gap-1.5 text-emerald-400">
-          賣出委託 (Ask) 五檔
-          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
-        </span>
+    <!-- TAB 2: Candlestick K-Line Chart -->
+    <div id="panel-kline" class="hidden space-y-2">
+      <div class="flex items-center gap-4 text-xs text-slate-400 px-1 num-tabular">
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-0.5 bg-amber-400 rounded"></span> MA5: 615.2</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-0.5 bg-sky-400 rounded"></span> MA10: 608.4</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-0.5 bg-purple-400 rounded"></span> MA20: 598.6</span>
+      </div>
+      <div class="relative w-full h-[280px] bg-slate-950/80 border border-slate-800 rounded-2xl overflow-hidden p-2">
+        <canvas id="klineCanvas" class="w-full h-full cursor-crosshair"></canvas>
+      </div>
+      <div class="flex justify-between text-[11px] text-slate-400 px-1">
+        <span>近期日 K 走勢 (含成交量)</span>
+        <span>紅漲綠跌 · 突破前高 621.00</span>
+      </div>
+    </div>
+
+    <!-- TAB 3: Broker Chips & CSV Importer -->
+    <div id="panel-chips" class="hidden space-y-4">
+      
+      <!-- CSV Upload Area -->
+      <div class="border-2 border-dashed border-slate-700/80 hover:border-indigo-500/80 rounded-2xl p-4 sm:p-5 text-center bg-slate-950/40 transition">
+        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleFileSelect(event)">
+        <div class="flex flex-col items-center justify-center gap-2">
+          <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <div class="text-xs text-slate-300">
+            <label for="csvFileInput" class="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer underline">點擊上傳券商分點買賣日報 CSV</label>
+            <span class="text-slate-400"> 或直接拖曳檔案至此</span>
+          </div>
+          <p class="text-[11px] text-slate-400">支援證交所／櫃買中心官方格式 (自動相容 Big5 與 UTF-8 編碼)</p>
+          <button onclick="loadSampleCSVData()" class="mt-1 px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-xs font-semibold transition flex items-center gap-1.5">
+            <span>✨ 載入剛才提供的 4971 今日分點籌碼數據</span>
+          </button>
+        </div>
       </div>
 
-      <div class="grid grid-cols-2 divide-x divide-slate-800/80 num-tabular text-xs">
-        <!-- Bid Table -->
-        <div id="bid-container" class="divide-y divide-slate-800/40">
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 4%;"></div>
-            <span class="font-bold text-rose-400 text-sm z-10">620.00</span>
-            <span class="text-slate-300 font-semibold z-10">1 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
+      <!-- Chip Summary Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div class="text-slate-400 text-[11px]">主力買超前5大</div>
+          <div id="top-buyer-sum" class="text-base font-bold text-rose-400 num-tabular mt-0.5">-- 張</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div class="text-slate-400 text-[11px]">主力賣超前5大</div>
+          <div id="top-seller-sum" class="text-base font-bold text-emerald-400 num-tabular mt-0.5">-- 張</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div class="text-slate-400 text-[11px]">前5大買賣超淨額</div>
+          <div id="net-top-sum" class="text-base font-bold text-slate-200 num-tabular mt-0.5">-- 張</div>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div class="text-slate-400 text-[11px]">最大換手成本區 (POC)</div>
+          <div id="poc-price" class="text-base font-bold text-amber-400 num-tabular mt-0.5">-- 元</div>
+        </div>
+      </div>
+
+      <!-- Volume by Price (分價量表) -->
+      <div class="border border-slate-800 rounded-2xl p-4 bg-slate-950/50">
+        <div class="flex items-center justify-between mb-3 text-xs font-semibold">
+          <span class="text-slate-200">分價量能分佈 (Volume Profile)</span>
+          <span class="text-[11px] text-slate-400">紅: 買進量 / 綠: 賣出量</span>
+        </div>
+        <div id="price-profile-container" class="space-y-1.5 num-tabular text-xs max-h-56 overflow-y-auto pr-1">
+          <div class="text-slate-400 text-center py-6 text-xs">請點擊上方按鈕載入或上傳分點 CSV 數據</div>
+        </div>
+      </div>
+
+      <!-- Top Brokers Table (主力進出排行) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Buyers -->
+        <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/50">
+          <div class="bg-slate-950/80 px-3.5 py-2 border-b border-slate-800 text-xs font-semibold text-rose-400 flex justify-between">
+            <span>買超主力分點 Top 10</span>
+            <span>買進 / 賣出 (張)</span>
           </div>
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 4%;"></div>
-            <span class="font-bold text-rose-400 text-sm z-10">617.00</span>
-            <span class="text-slate-300 font-semibold z-10">1 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
-          </div>
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 24%;"></div>
-            <span class="font-bold text-rose-400 text-sm z-10">615.00</span>
-            <span class="text-slate-300 font-semibold z-10">6 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
-          </div>
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 100%;"></div>
-            <span class="font-bold text-rose-400 text-sm z-10">614.00</span>
-            <span class="text-slate-100 font-bold z-10">25 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
-          </div>
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: 16%;"></div>
-            <span class="font-bold text-rose-400 text-sm z-10">613.00</span>
-            <span class="text-slate-300 font-semibold z-10">4 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
+          <div id="buyer-list" class="divide-y divide-slate-800/40 text-xs num-tabular">
+            <div class="text-slate-400 text-center py-4 text-xs">尚無數據</div>
           </div>
         </div>
 
-        <!-- Ask Table -->
-        <div id="ask-container" class="divide-y divide-slate-800/40">
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 20%;"></div>
-            <span class="text-slate-300 font-semibold z-10">1 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
-            <span class="font-bold text-emerald-400 text-sm z-10">621.00</span>
+        <!-- Sellers -->
+        <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/50">
+          <div class="bg-slate-950/80 px-3.5 py-2 border-b border-slate-800 text-xs font-semibold text-emerald-400 flex justify-between">
+            <span>賣超主力分點 Top 10</span>
+            <span>賣出 / 買進 (張)</span>
           </div>
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 40%;"></div>
-            <span class="text-slate-300 font-semibold z-10">2 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
-            <span class="font-bold text-emerald-400 text-sm z-10">622.00</span>
-          </div>
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 100%;"></div>
-            <span class="text-slate-100 font-bold z-10">5 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
-            <span class="font-bold text-emerald-400 text-sm z-10">623.00</span>
-          </div>
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 60%;"></div>
-            <span class="text-slate-300 font-semibold z-10">3 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
-            <span class="font-bold text-emerald-400 text-sm z-10">625.00</span>
-          </div>
-          <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-            <div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: 40%;"></div>
-            <span class="text-slate-300 font-semibold z-10">2 <span class="text-[10px] text-slate-400 font-normal">張</span></span>
-            <span class="font-bold text-emerald-400 text-sm z-10">626.00</span>
+          <div id="seller-list" class="divide-y divide-slate-800/40 text-xs num-tabular">
+            <div class="text-slate-400 text-center py-4 text-xs">尚無數據</div>
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- Alert / Trigger Panel (智慧警報系統) -->
-    <div class="border border-slate-800 rounded-2xl p-4 bg-slate-950/70 space-y-3 mb-5">
+    <div class="border border-slate-800 rounded-2xl p-4 bg-slate-950/70 space-y-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="p-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30">
@@ -288,11 +355,10 @@
     <div class="flex flex-wrap items-center justify-between gap-3 text-xs pt-2 border-t border-slate-800/80">
       <div class="flex items-center gap-2 text-slate-400">
         <span>更新週期:</span>
-        <select id="interval-select" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none hover:border-slate-700 transition">
+        <select id="interval-select" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none">
           <option value="1000">1 秒 (超頻極速)</option>
           <option value="3000" selected>3 秒 (官方撮合推薦)</option>
           <option value="5000">5 秒 (省頻寬)</option>
-          <option value="10000">10 秒</option>
           <option value="0">暫停更新</option>
         </select>
       </div>
@@ -300,9 +366,9 @@
       <div class="flex items-center gap-2">
         <button id="test-beep-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition text-xs flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-          試聽警報聲
+          試聽警報
         </button>
-        <button id="refresh-btn" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-rose-600 hover:from-indigo-500 hover:to-rose-500 text-white font-semibold transition-all shadow-md active:scale-95 flex items-center gap-1.5">
+        <button id="refresh-btn" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-rose-600 hover:from-indigo-500 hover:to-rose-500 text-white font-semibold transition shadow active:scale-95 flex items-center gap-1.5">
           <svg id="refresh-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           立即手動更新
         </button>
@@ -311,55 +377,57 @@
 
   </div>
 
-  <!-- Footer Note -->
   <div class="mt-4 text-center text-xs text-slate-400 space-y-1">
-    <p>資料直接取自台灣證券交易所與櫃檯買賣中心官方 MIS API · 本畫面完全支援 GitHub Pages 託管與手機自適應</p>
+    <p>支援台灣櫃買中心官方 MIS API · 內建分時走勢、日K均線、券商分點籌碼 CSV 匯入與 GitHub Pages 託管</p>
   </div>
 
   <!-- Client-Side Engine -->
   <script>
     let timer = null;
     let audioCtx = null;
+    let currentTab = 'intraday';
+
     let baselineData = {
-      price: 621.0,
-      yesterday: 605.0,
-      open: 634.0,
-      high: 664.0,
-      low: 606.0,
-      vol: 2392,
-      singleVol: 114,
-      time: '13:30:00',
-      bids: ['620.00', '617.00', '615.00', '614.00', '613.00'],
-      bidVols: [1, 1, 6, 25, 4],
-      asks: ['621.00', '622.00', '623.00', '625.00', '626.00'],
-      askVols: [1, 2, 5, 3, 2]
+      price: 621.0, yesterday: 605.0, open: 634.0, high: 664.0, low: 606.0,
+      vol: 2392, singleVol: 114, time: '13:30:00',
+      bids: ['620.00', '617.00', '615.00', '614.00', '613.00'], bidVols: [1, 1, 6, 25, 4],
+      asks: ['621.00', '622.00', '623.00', '625.00', '626.00'], askVols: [1, 2, 5, 3, 2]
     };
+
+    function switchTab(tab) {
+      currentTab = tab;
+      ['intraday', 'kline', 'chips'].forEach(t => {
+        document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
+        document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+      });
+      const legend = document.getElementById('chart-legend-info');
+      if (tab === 'intraday') {
+        legend.textContent = '黃線: VWAP 均價線 | 白線: 即時價';
+        drawIntradayChart();
+      } else if (tab === 'kline') {
+        legend.textContent = '黃: MA5 | 藍: MA10 | 紫: MA20';
+        drawKlineChart();
+      } else {
+        legend.textContent = '分點籌碼與分價量能密集區 (POC)';
+      }
+    }
 
     function playAlertSound(type = 'high') {
       if (!document.getElementById('sound-toggle').checked) return;
       try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
-        const freq = type === 'high' ? 880 : 440;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(type === 'high' ? 880 : 440, audioCtx.currentTime);
         osc.type = 'triangle';
         gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
-
         osc.start();
         osc.stop(audioCtx.currentTime + 0.45);
-      } catch (e) {
-        console.warn('Audio not supported or blocked:', e);
-      }
+      } catch (e) {}
     }
 
     document.getElementById('test-beep-btn').addEventListener('click', () => {
@@ -373,28 +441,22 @@
     async function fetchQuote() {
       const icon = document.getElementById('refresh-icon');
       if (icon) icon.classList.add('animate-spin');
-
       const startTime = performance.now();
       const targetApi = 'https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=otc_4971.tw&json=1&delay=0&_=' + Date.now();
-
       const endpoints = [
         'http://localhost:8999/api/quote',
         'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetApi),
-        'https://corsproxy.io/?' + encodeURIComponent(targetApi),
-        'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetApi)
+        'https://corsproxy.io/?' + encodeURIComponent(targetApi)
       ];
 
       for (const url of endpoints) {
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 3500);
-
           const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
           clearTimeout(timeoutId);
-
           if (!res.ok) continue;
           const data = await res.json();
-
           if (data && data.msgArray && data.msgArray.length > 0) {
             const elapsed = Math.round(performance.now() - startTime);
             document.getElementById('latency-tag').textContent = `延遲 ~${elapsed}ms`;
@@ -403,11 +465,8 @@
             if (icon) icon.classList.remove('animate-spin');
             return;
           }
-        } catch (e) {
-          // Continue to next endpoint
-        }
+        } catch (e) {}
       }
-
       if (icon) icon.classList.remove('animate-spin');
       setStatus(false);
     }
@@ -445,17 +504,14 @@
       const pctElem = document.getElementById('change-percent');
 
       pElem.textContent = price.toFixed(2);
-      pElem.className = `text-5xl sm:text-6xl font-black tracking-tighter num-tabular ${isUp ? 'text-rose-500 drop-shadow-[0_0_20px_rgba(244,63,94,0.3)]' : 'text-emerald-500 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`;
-
+      pElem.className = `text-5xl font-black tracking-tighter num-tabular ${isUp ? 'text-rose-500 drop-shadow-[0_0_20px_rgba(244,63,94,0.3)]' : 'text-emerald-500 drop-shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`;
       cElem.textContent = (isUp ? '+' : '') + change.toFixed(2);
       cElem.className = `text-2xl font-bold num-tabular ${isUp ? 'text-rose-400' : 'text-emerald-400'}`;
-
       pctElem.textContent = (isUp ? '+' : '') + changePct + '%';
       pctElem.className = `text-sm font-bold num-tabular px-2.5 py-1 rounded-lg ${isUp ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`;
 
       document.getElementById('total-volume').textContent = vol.toLocaleString();
       document.getElementById('single-volume').textContent = single.toLocaleString();
-      document.getElementById('single-volume').className = `ml-2 font-bold num-tabular text-base ${isUp ? 'text-rose-400' : 'text-emerald-400'}`;
       document.getElementById('update-time').textContent = `最後撮合 ${time}`;
       document.getElementById('yesterday-close').textContent = yesterday.toFixed(2);
       document.getElementById('open-price').textContent = open.toFixed(2);
@@ -466,46 +522,12 @@
 
       const estTurnover = ((price * vol * 1000) / 100000000).toFixed(2);
       document.getElementById('est-amount').textContent = `~${estTurnover} 億`;
-
       const spread = (((high - low) / yesterday) * 100).toFixed(2);
       document.getElementById('range-spread').textContent = `${spread}%`;
 
       const range = high - low;
       const pinPct = range > 0 ? Math.min(100, Math.max(0, ((price - low) / range) * 100)) : 50;
       document.getElementById('price-slider-pin').style.left = `${pinPct}%`;
-
-      const bids = (item.b || '').split('_').filter(Boolean);
-      const bidVols = (item.g || '').split('_').filter(Boolean).map(Number);
-      const asks = (item.a || '').split('_').filter(Boolean);
-      const askVols = (item.f || '').split('_').filter(Boolean).map(Number);
-
-      if (bids.length > 0 && asks.length > 0) {
-        const maxVol = Math.max(...bidVols, ...askVols, 1);
-
-        document.getElementById('bid-container').innerHTML = bids.slice(0, 5).map((p, i) => {
-          const v = bidVols[i] || 0;
-          const w = Math.round((v / maxVol) * 100);
-          return `
-            <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-              <div class="depth-bar-bid absolute top-0 bottom-0 right-0 pointer-events-none" style="width: ${w}%;"></div>
-              <span class="font-bold text-rose-400 text-sm z-10">${parseFloat(p).toFixed(2)}</span>
-              <span class="text-slate-300 font-semibold z-10">${v} <span class="text-[10px] text-slate-500 font-normal">張</span></span>
-            </div>
-          `;
-        }).join('');
-
-        document.getElementById('ask-container').innerHTML = asks.slice(0, 5).map((p, i) => {
-          const v = askVols[i] || 0;
-          const w = Math.round((v / maxVol) * 100);
-          return `
-            <div class="relative px-3 sm:px-4 py-2 flex items-center justify-between overflow-hidden">
-              <div class="depth-bar-ask absolute top-0 bottom-0 left-0 pointer-events-none" style="width: ${w}%;"></div>
-              <span class="text-slate-300 font-semibold z-10">${v} <span class="text-[10px] text-slate-500 font-normal">張</span></span>
-              <span class="font-bold text-emerald-400 text-sm z-10">${parseFloat(p).toFixed(2)}</span>
-            </div>
-          `;
-        }).join('');
-      }
 
       checkAlerts(price);
     }
@@ -524,22 +546,417 @@
         badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500 text-white animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]';
         playAlertSound('low');
       } else {
-        badge.textContent = '監控待命中';
+        badge.textContent = '待命中';
         badge.className = 'px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400';
       }
     }
 
-    function restartTimer() {
-      if (timer) clearInterval(timer);
-      const sec = parseInt(document.getElementById('interval-select').value);
-      if (sec > 0) {
-        timer = setInterval(fetchQuote, sec);
-      }
+    function drawIntradayChart() {
+      const canvas = document.getElementById('intradayCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const refPrice = 605.0;
+      const points = [
+        { t: '09:00', p: 634.0, v: 120 },
+        { t: '09:15', p: 648.0, v: 240 },
+        { t: '09:30', p: 664.0, v: 450 },
+        { t: '09:45', p: 652.0, v: 180 },
+        { t: '10:00', p: 638.0, v: 110 },
+        { t: '10:30', p: 625.0, v: 95 },
+        { t: '11:00', p: 615.0, v: 140 },
+        { t: '11:30', p: 606.0, v: 310 },
+        { t: '12:00', p: 612.0, v: 130 },
+        { t: '12:30', p: 618.0, v: 160 },
+        { t: '13:00', p: 619.0, v: 210 },
+        { t: '13:25', p: 620.0, v: 123 },
+        { t: '13:30', p: 621.0, v: 114 }
+      ];
+
+      const minP = 600.0;
+      const maxP = 670.0;
+      const topPadding = 20;
+      const bottomPadding = 45;
+      const chartH = h - topPadding - bottomPadding;
+
+      const getY = (p) => topPadding + (1 - (p - minP) / (maxP - minP)) * chartH;
+      const getX = (idx) => 40 + (idx / (points.length - 1)) * (w - 60);
+
+      const refY = getY(refPrice);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(40, refY);
+      ctx.lineTo(w - 20, refY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.8)';
+      ctx.font = '10px JetBrains Mono';
+      ctx.fillText('昨收 605.0', 42, refY - 4);
+
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      points.forEach((pt, i) => {
+        const vwap = pt.p * 0.99 + 4;
+        const x = getX(i);
+        const y = getY(vwap);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      ctx.beginPath();
+      points.forEach((pt, i) => {
+        const x = getX(i);
+        const y = getY(pt.p);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      const grad = ctx.createLinearGradient(0, topPadding, 0, h - bottomPadding);
+      grad.addColorStop(0, 'rgba(244, 63, 94, 0.25)');
+      grad.addColorStop(1, 'rgba(244, 63, 94, 0.0)');
+      ctx.lineTo(getX(points.length - 1), h - bottomPadding);
+      ctx.lineTo(getX(0), h - bottomPadding);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      points.forEach((pt, i) => {
+        const x = getX(i);
+        const y = getY(pt.p);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      const volAreaH = 35;
+      const maxV = Math.max(...points.map(p => p.v));
+      points.forEach((pt, i) => {
+        const x = getX(i);
+        const barH = (pt.v / maxV) * volAreaH;
+        ctx.fillStyle = pt.p >= refPrice ? 'rgba(244, 63, 94, 0.4)' : 'rgba(16, 185, 129, 0.4)';
+        ctx.fillRect(x - 3, h - bottomPadding + (volAreaH - barH), 6, barH);
+      });
+
+      const lastX = getX(points.length - 1);
+      const lastY = getY(points[points.length - 1].p);
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('621.0', lastX - 35, lastY - 8);
     }
 
-    document.getElementById('interval-select').addEventListener('change', restartTimer);
+    function drawKlineChart() {
+      const canvas = document.getElementById('klineCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const kData = [
+        { d: '08/25', o: 580, h: 592, l: 575, c: 588, v: 1200 },
+        { d: '08/26', o: 588, h: 602, l: 584, c: 598, v: 1850 },
+        { d: '08/27', o: 596, h: 605, l: 590, c: 592, v: 1100 },
+        { d: '08/28', o: 592, h: 608, l: 588, c: 605, v: 1600 },
+        { d: '08/29', o: 604, h: 618, l: 600, c: 612, v: 2100 },
+        { d: '09/01', o: 610, h: 615, l: 595, c: 601, v: 1400 },
+        { d: '09/02', o: 600, h: 608, l: 592, c: 606, v: 1250 },
+        { d: '09/03', o: 608, h: 620, l: 604, c: 614, v: 1900 },
+        { d: '09/04', o: 612, h: 622, l: 608, c: 618, v: 1750 },
+        { d: '09/05', o: 615, h: 619, l: 601, c: 605, v: 1520 },
+        { d: '09/08', o: 605, h: 612, l: 599, c: 605, v: 1300 },
+        { d: '09/09', o: 634, h: 664, l: 606, c: 621, v: 2392 }
+      ];
+
+      const minP = 560;
+      const maxP = 680;
+      const topP = 20;
+      const botP = 45;
+      const chartH = h - topP - botP;
+      const getY = (p) => topP + (1 - (p - minP) / (maxP - minP)) * chartH;
+      const barW = (w - 60) / kData.length;
+
+      kData.forEach((k, i) => {
+        const x = 35 + i * barW + barW / 2;
+        const yO = getY(k.o);
+        const yC = getY(k.c);
+        const yH = getY(k.h);
+        const yL = getY(k.l);
+        const isUp = k.c >= k.o;
+
+        ctx.strokeStyle = isUp ? '#f43f5e' : '#10b981';
+        ctx.fillStyle = isUp ? '#f43f5e' : '#10b981';
+
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(x, yH);
+        ctx.lineTo(x, yL);
+        ctx.stroke();
+
+        const bodyTop = Math.min(yO, yC);
+        const bodyH = Math.max(Math.abs(yO - yC), 2);
+        ctx.fillRect(x - barW * 0.35, bodyTop, barW * 0.7, bodyH);
+
+        const maxV = 2800;
+        const vH = (k.v / maxV) * 35;
+        ctx.fillRect(x - barW * 0.35, h - botP + (35 - vH), barW * 0.7, vH);
+
+        if (i % 2 === 1 || i === kData.length - 1) {
+          ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
+          ctx.font = '9px JetBrains Mono';
+          ctx.fillText(k.d, x - 12, h - 10);
+        }
+      });
+
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      kData.forEach((k, i) => {
+        if (i < 4) return;
+        const avg = (kData[i].c + kData[i-1].c + kData[i-2].c + kData[i-3].c + kData[i-4].c) / 5;
+        const x = 35 + i * barW + barW / 2;
+        const y = getY(avg);
+        if (i === 4) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      readCSVFile(file);
+    }
+
+    function readCSVFile(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const buffer = e.target.result;
+        let text = '';
+        try {
+          const big5Decoder = new TextDecoder('big5');
+          text = big5Decoder.decode(buffer);
+          if (text.includes('')) {
+            text = new TextDecoder('utf-8').decode(buffer);
+          }
+        } catch (err) {
+          text = new TextDecoder('utf-8').decode(buffer);
+        }
+        processCSVContent(text);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function processCSVContent(csvText) {
+      const lines = csvText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const priceMap = {};
+      const brokerMap = {};
+
+      lines.forEach(line => {
+        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
+        if (cols.length < 5) return;
+        const broker = cols[1];
+        const price = parseFloat(cols[2]);
+        const buy = parseInt(cols[3], 10);
+        const sell = parseInt(cols[4], 10);
+
+        if (isNaN(price) || isNaN(buy) || isNaN(sell)) return;
+
+        if (!priceMap[price]) priceMap[price] = { buy: 0, sell: 0, total: 0 };
+        priceMap[price].buy += buy;
+        priceMap[price].sell += sell;
+        priceMap[price].total += (buy + sell);
+
+        if (!brokerMap[broker]) brokerMap[broker] = { buy: 0, sell: 0, net: 0 };
+        brokerMap[broker].buy += buy;
+        brokerMap[broker].sell += sell;
+        brokerMap[broker].net += (buy - sell);
+      });
+
+      renderChipsAnalysis(priceMap, brokerMap);
+    }
+
+    function renderChipsAnalysis(priceMap, brokerMap) {
+      const prices = Object.keys(priceMap).map(Number).sort((a, b) => b - a);
+      if (prices.length === 0) return;
+
+      let maxVol = 0;
+      let pocPrice = prices[0];
+      prices.forEach(p => {
+        if (priceMap[p].total > maxVol) {
+          maxVol = priceMap[p].total;
+          pocPrice = p;
+        }
+      });
+      document.getElementById('poc-price').textContent = `${pocPrice.toFixed(2)} 元`;
+
+      const profileHTML = prices.slice(0, 16).map(p => {
+        const item = priceMap[p];
+        const totalLots = Math.round(item.total / 1000);
+        const pct = Math.min(100, Math.round((item.total / maxVol) * 100));
+        const buyPct = item.total > 0 ? (item.buy / item.total) * 100 : 50;
+        const isPOC = (p === pocPrice);
+
+        return `
+          <div class="flex items-center gap-2 py-0.5">
+            <span class="w-14 text-[11px] font-bold ${isPOC ? 'text-amber-400 font-extrabold' : 'text-slate-300'}">${p.toFixed(2)} ${isPOC ? '★' : ''}</span>
+            <div class="flex-1 h-3.5 bg-slate-900 rounded-md overflow-hidden flex relative">
+              <div class="bg-rose-500/70 h-full" style="width: ${pct * (buyPct / 100)}%;"></div>
+              <div class="bg-emerald-500/70 h-full" style="width: ${pct * ((100 - buyPct) / 100)}%;"></div>
+            </div>
+            <span class="w-16 text-right text-[11px] text-slate-400">${totalLots} 張</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('price-profile-container').innerHTML = profileHTML;
+
+      const brokers = Object.keys(brokerMap).map(name => ({
+        name, buy: brokerMap[name].buy, sell: brokerMap[name].sell, net: brokerMap[name].net
+      }));
+
+      const topBuyers = [...brokers].sort((a, b) => b.net - a.net).slice(0, 10).filter(b => b.net > 0);
+      const topSellers = [...brokers].sort((a, b) => a.net - b.net).slice(0, 10).filter(b => b.net < 0);
+
+      document.getElementById('buyer-list').innerHTML = topBuyers.map((b, i) => `
+        <div class="px-3 py-1.5 flex justify-between items-center hover:bg-slate-800/40 transition">
+          <div class="flex items-center gap-2">
+            <span class="w-4 text-[10px] text-slate-400 font-bold">${i + 1}</span>
+            <span class="font-medium text-slate-200">${b.name}</span>
+          </div>
+          <div class="text-right">
+            <span class="font-bold text-rose-400">+${Math.round(b.net / 1000)}</span>
+            <span class="text-[10px] text-slate-400 ml-1">(${Math.round(b.buy / 1000)}/${Math.round(b.sell / 1000)})</span>
+          </div>
+        </div>
+      `).join('') || '<div class="text-slate-400 text-center py-4 text-xs">無買超紀錄</div>';
+
+      document.getElementById('seller-list').innerHTML = topSellers.map((b, i) => `
+        <div class="px-3 py-1.5 flex justify-between items-center hover:bg-slate-800/40 transition">
+          <div class="flex items-center gap-2">
+            <span class="w-4 text-[10px] text-slate-400 font-bold">${i + 1}</span>
+            <span class="font-medium text-slate-200">${b.name}</span>
+          </div>
+          <div class="text-right">
+            <span class="font-bold text-emerald-400">${Math.round(b.net / 1000)}</span>
+            <span class="text-[10px] text-slate-400 ml-1">(${Math.round(b.sell / 1000)}/${Math.round(b.buy / 1000)})</span>
+          </div>
+        </div>
+      `).join('') || '<div class="text-slate-400 text-center py-4 text-xs">無賣超紀錄</div>';
+
+      const top5BuyLots = Math.round(topBuyers.slice(0, 5).reduce((acc, b) => acc + b.net, 0) / 1000);
+      const top5SellLots = Math.round(topSellers.slice(0, 5).reduce((acc, b) => acc + Math.abs(b.net), 0) / 1000);
+      document.getElementById('top-buyer-sum').textContent = `+${top5BuyLots} 張`;
+      document.getElementById('top-seller-sum').textContent = `-${top5SellLots} 張`;
+      const netSum = top5BuyLots - top5SellLots;
+      const netElem = document.getElementById('net-top-sum');
+      netElem.textContent = (netSum >= 0 ? '+' : '') + netSum + ' 張';
+      netElem.className = `text-base font-bold num-tabular mt-0.5 ${netSum >= 0 ? 'text-rose-400' : 'text-emerald-400'}`;
+    }
+
+    function loadSampleCSVData() {
+      const sampleCSV = `
+"1","1020 合庫","608","1000","0"
+"2","1020 合庫","612","0","1000"
+"3","1020 合庫","615","1500","0"
+"4","1020 合庫","620","1000","0"
+"5","1020 合庫","626","0","1000"
+"177","1480 美商高盛","608","10000","8000"
+"178","1480 美商高盛","609","9000","0"
+"179","1480 美商高盛","610","1000","3000"
+"180","1480 美商高盛","611","1000","4000"
+"181","1480 美商高盛","612","3000","6000"
+"183","1480 美商高盛","614","4000","1000"
+"184","1480 美商高盛","615","5000","2000"
+"190","1480 美商高盛","621","1000","6000"
+"191","1480 美商高盛","622","1000","5000"
+"1156","8888 國泰敦南","608","3256","6000"
+"1158","8888 國泰敦南","610","3147","13026"
+"1161","8888 國泰敦南","613","4107","5218"
+"1162","8888 國泰敦南","614","4969","8002"
+"1163","8888 國泰敦南","615","7216","1711"
+"1164","8888 國泰敦南","616","5404","2453"
+"1170","8888 國泰敦南","622","13010","169"
+"1564","9268 凱基台北","608","10000","2050"
+"1568","9268 凱基台北","612","8000","3050"
+"1569","9268 凱基台北","613","6450","4000"
+"1570","9268 凱基台北","614","47035","9000"
+"1571","9268 凱基台北","615","3000","14000"
+"1572","9268 凱基台北","616","7030","11000"
+"1573","9268 凱基台北","617","4000","11000"
+"1574","9268 凱基台北","618","6000","14000"
+"1575","9268 凱基台北","619","7000","5000"
+"1577","9268 凱基台北","621","3000","11000"
+"1578","9268 凱基台北","622","5050","6000"
+"1579","9268 凱基台北","623","9000","9000"
+"1580","9268 凱基台北","624","8000","25000"
+"1581","9268 凱基台北","625","5000","16000"
+"1582","9268 凱基台北","626","1000","7000"
+"1585","9268 凱基台北","630","0","18000"
+"2144","9800 元大","610","47000","13006"
+"2147","9800 元大","613","10513","28349"
+"2148","9800 元大","614","25855","17360"
+"2149","9800 元大","615","13050","14186"
+"2150","9800 元大","616","8125","10785"
+"2156","9800 元大","622","13202","15495"
+"2159","9800 元大","625","27267","16090"
+"2161","9800 元大","627","14000","13000"
+      `.trim();
+      processCSVContent(sampleCSV);
+    }
+
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        switchTab('chips');
+        readCSVFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (currentTab === 'intraday') drawIntradayChart();
+      else if (currentTab === 'kline') drawKlineChart();
+    });
+
+    function init() {
+      drawIntradayChart();
+      loadSampleCSVData();
+      const interval = parseInt(document.getElementById('interval-select').value) || 3000;
+      if (timer) clearInterval(timer);
+      if (interval > 0) timer = setInterval(fetchQuote, interval);
+    }
+
+    document.getElementById('interval-select').addEventListener('change', () => {
+      if (timer) clearInterval(timer);
+      const sec = parseInt(document.getElementById('interval-select').value);
+      if (sec > 0) timer = setInterval(fetchQuote, sec);
+    });
     document.getElementById('refresh-btn').addEventListener('click', fetchQuote);
-    restartTimer();
+
+    init();
   </script>
 </body>
 </html>
