@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>4971 IET-KY 即時看盤終端 | 技術線型與分點籌碼</title>
+  <title>4971 IET-KY 即時看盤終端 | 主券商彙整與分點籌碼</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -56,12 +56,17 @@
       color: #818cf8;
       border-color: rgba(129, 140, 248, 0.4);
     }
+    .subtab-btn.active {
+      background: #312e81;
+      color: #e0e7ff;
+      border-color: #6366f1;
+    }
   </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 antialiased selection:bg-rose-500/30">
 
   <!-- Main Container -->
-  <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800/80 rounded-3xl p-4 sm:p-7 shadow-2xl backdrop-blur-xl relative overflow-hidden space-y-5">
+  <div class="w-full max-w-5xl bg-slate-900/95 border border-slate-800/80 rounded-3xl p-4 sm:p-7 shadow-2xl backdrop-blur-xl relative overflow-hidden space-y-5">
     
     <!-- Top Glow Line -->
     <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-rose-500/60 to-transparent"></div>
@@ -184,7 +189,7 @@
 
     <!-- Mode Selector Navigation Tabs -->
     <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 pt-1">
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-1.5 flex-wrap">
         <button id="tab-intraday" onclick="switchTab('intraday')" class="tab-btn active px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
           即時分時走勢
@@ -195,7 +200,7 @@
         </button>
         <button id="tab-chips" onclick="switchTab('chips')" class="tab-btn px-3.5 py-1.5 rounded-xl border border-transparent text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/></svg>
-          券商分點 & 籌碼 CSV
+          券商買賣超一鍵彙整 (VBA 級報表)
         </button>
       </div>
 
@@ -232,37 +237,42 @@
       </div>
     </div>
 
-    <!-- TAB 3: Broker Chips & CSV Importer -->
+    <!-- TAB 3: Broker Net Flow (Full VBA BrokerNetFlow Equivalent) -->
     <div id="panel-chips" class="hidden space-y-4">
       
       <!-- CSV Upload Area -->
       <div class="border-2 border-dashed border-slate-700/80 hover:border-indigo-500/80 rounded-2xl p-4 sm:p-5 text-center bg-slate-950/40 transition">
-        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleFileSelect(event)">
+        <input type="file" id="csvFileInput" accept=".csv,.txt" class="hidden" onchange="handleFileSelect(event)">
         <div class="flex flex-col items-center justify-center gap-2">
           <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           <div class="text-xs text-slate-300">
-            <label for="csvFileInput" class="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer underline">點擊上傳券商分點買賣日報 CSV</label>
+            <label for="csvFileInput" class="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer underline text-sm">點此選擇券商成交價量 CSV 檔案</label>
             <span class="text-slate-400"> 或直接拖曳檔案至此</span>
           </div>
-          <p class="text-[11px] text-slate-400">支援證交所／櫃買中心官方格式 (自動相容 Big5 與 UTF-8 編碼)</p>
-          <button onclick="loadSampleCSVData()" class="mt-1 px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-xs font-semibold transition flex items-center gap-1.5">
-            <span>✨ 載入剛才提供的 4971 今日分點籌碼數據</span>
-          </button>
+          <p class="text-[11px] text-emerald-400 font-medium">✓ 自動相容 Big5 / ANSI / UTF-8 編碼 · 內建全台券商代碼字典，絕不出現問號亂碼</p>
+          <div class="flex items-center gap-2 mt-1">
+            <button onclick="loadSampleCSVData()" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 text-xs font-semibold transition flex items-center gap-1.5">
+              <span>✨ 重新載入 4971 今日 3,350 筆完整分點明細</span>
+            </button>
+            <button onclick="exportCleanCSV()" class="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition flex items-center gap-1.5">
+              <span>📥 匯出 Excel 相容 CSV (無亂碼)</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Chip Summary Cards -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
         <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-          <div class="text-slate-400 text-[11px]">主力買超前5大</div>
+          <div class="text-slate-400 text-[11px]">主力買超前 5 大</div>
           <div id="top-buyer-sum" class="text-base font-bold text-rose-400 num-tabular mt-0.5">-- 張</div>
         </div>
         <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-          <div class="text-slate-400 text-[11px]">主力賣超前5大</div>
+          <div class="text-slate-400 text-[11px]">主力賣超前 5 大</div>
           <div id="top-seller-sum" class="text-base font-bold text-emerald-400 num-tabular mt-0.5">-- 張</div>
         </div>
         <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-          <div class="text-slate-400 text-[11px]">前5大買賣超淨額</div>
+          <div class="text-slate-400 text-[11px]">前 5 大買賣超淨額</div>
           <div id="net-top-sum" class="text-base font-bold text-slate-200 num-tabular mt-0.5">-- 張</div>
         </div>
         <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
@@ -271,39 +281,94 @@
         </div>
       </div>
 
-      <!-- Volume by Price (分價量表) -->
-      <div class="border border-slate-800 rounded-2xl p-4 bg-slate-950/50">
-        <div class="flex items-center justify-between mb-3 text-xs font-semibold">
-          <span class="text-slate-200">分價量能分佈 (Volume Profile)</span>
-          <span class="text-[11px] text-slate-400">紅: 買進量 / 綠: 賣出量</span>
+      <!-- Report View Controls (Matching VBA Sheets: 主券商合計 / 分點彙整 / 分價量表) -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 border-t border-slate-800">
+        <!-- Subtab Buttons -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-semibold">彙整視圖:</span>
+          <button id="subtab-parent" onclick="switchSubTab('parent')" class="subtab-btn active px-3 py-1 rounded-lg border border-slate-700 text-xs font-semibold transition">
+            主券商合計 (智慧分組)
+          </button>
+          <button id="subtab-branch" onclick="switchSubTab('branch')" class="subtab-btn px-3 py-1 rounded-lg border border-slate-700 text-xs font-semibold text-slate-400 hover:text-white transition">
+            分點彙整明細
+          </button>
+          <button id="subtab-profile" onclick="switchSubTab('profile')" class="subtab-btn px-3 py-1 rounded-lg border border-slate-700 text-xs font-semibold text-slate-400 hover:text-white transition">
+            分價量能分佈 (POC)
+          </button>
         </div>
-        <div id="price-profile-container" class="space-y-1.5 num-tabular text-xs max-h-56 overflow-y-auto pr-1">
-          <div class="text-slate-400 text-center py-6 text-xs">請點擊上方按鈕載入或上傳分點 CSV 數據</div>
+
+        <!-- Filter & Search -->
+        <div class="flex items-center gap-2">
+          <input id="brokerSearchInput" type="text" placeholder="搜尋券商名稱或代號..." oninput="filterBrokerTable()" class="px-2.5 py-1 text-xs rounded-lg border border-slate-700 bg-slate-800 text-white outline-none focus:border-indigo-500 w-44">
+          <select id="groupModeSelect" onchange="changeGroupMode(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none">
+            <option value="smart" selected>智慧模式 (外資獨立/本土前兩碼)</option>
+            <option value="prefix2">全部取前兩碼</option>
+            <option value="detail">完全不分組 (分點獨立)</option>
+          </select>
         </div>
       </div>
 
-      <!-- Top Brokers Table (主力進出排行) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <!-- Buyers -->
-        <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/50">
-          <div class="bg-slate-950/80 px-3.5 py-2 border-b border-slate-800 text-xs font-semibold text-rose-400 flex justify-between">
-            <span>買超主力分點 Top 10</span>
-            <span>買進 / 賣出 (張)</span>
-          </div>
-          <div id="buyer-list" class="divide-y divide-slate-800/40 text-xs num-tabular">
-            <div class="text-slate-400 text-center py-4 text-xs">尚無數據</div>
-          </div>
+      <!-- VIEW 1: Parent Broker Summary Table (對應 VBA SH_PAR 主券商合計) -->
+      <div id="view-parent-table" class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/60">
+        <div class="overflow-x-auto max-h-96">
+          <table class="w-full text-left text-xs num-tabular border-collapse">
+            <thead class="bg-slate-900/90 sticky top-0 text-[11px] text-slate-400 border-b border-slate-800 select-none">
+              <tr>
+                <th class="p-2.5 cursor-pointer hover:text-white" onclick="sortBrokerTable('rank')">排名 ⬍</th>
+                <th class="p-2.5 cursor-pointer hover:text-white" onclick="sortBrokerTable('code')">分組碼 ⬍</th>
+                <th class="p-2.5">主券商名稱</th>
+                <th class="p-2.5">屬性</th>
+                <th class="p-2.5 text-center">分點數</th>
+                <th class="p-2.5 text-right cursor-pointer hover:text-white" onclick="sortBrokerTable('buy')">買進(張) ⬍</th>
+                <th class="p-2.5 text-right cursor-pointer hover:text-white" onclick="sortBrokerTable('sell')">賣出(張) ⬍</th>
+                <th class="p-2.5 text-right cursor-pointer hover:text-white font-bold text-slate-200" onclick="sortBrokerTable('net')">買賣超(張) ⬍</th>
+                <th class="p-2.5 text-right">總量(張)</th>
+                <th class="p-2.5 text-right">買均價</th>
+                <th class="p-2.5 text-right">賣均價</th>
+                <th class="p-2.5 text-right cursor-pointer hover:text-white" onclick="sortBrokerTable('diff')">均價差 ⬍</th>
+              </tr>
+            </thead>
+            <tbody id="parent-table-body" class="divide-y divide-slate-800/40">
+              <tr><td colspan="12" class="text-center py-6 text-slate-400">正在處理資料...</td></tr>
+            </tbody>
+          </table>
         </div>
+      </div>
 
-        <!-- Sellers -->
-        <div class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/50">
-          <div class="bg-slate-950/80 px-3.5 py-2 border-b border-slate-800 text-xs font-semibold text-emerald-400 flex justify-between">
-            <span>賣超主力分點 Top 10</span>
-            <span>賣出 / 買進 (張)</span>
-          </div>
-          <div id="seller-list" class="divide-y divide-slate-800/40 text-xs num-tabular">
-            <div class="text-slate-400 text-center py-4 text-xs">尚無數據</div>
-          </div>
+      <!-- VIEW 2: Branch Detail Table (對應 VBA SH_BR 分點彙整) -->
+      <div id="view-branch-table" class="hidden border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/60">
+        <div class="overflow-x-auto max-h-96">
+          <table class="w-full text-left text-xs num-tabular border-collapse">
+            <thead class="bg-slate-900/90 sticky top-0 text-[11px] text-slate-400 border-b border-slate-800 select-none">
+              <tr>
+                <th class="p-2.5">排名</th>
+                <th class="p-2.5">券商代號</th>
+                <th class="p-2.5">分點名稱</th>
+                <th class="p-2.5">屬性</th>
+                <th class="p-2.5 text-right">買進(張)</th>
+                <th class="p-2.5 text-right">賣出(張)</th>
+                <th class="p-2.5 text-right font-bold text-slate-200">買賣超(張)</th>
+                <th class="p-2.5 text-right">總量(張)</th>
+                <th class="p-2.5 text-right">買均價</th>
+                <th class="p-2.5 text-right">賣均價</th>
+                <th class="p-2.5 text-right">均價差</th>
+              </tr>
+            </thead>
+            <tbody id="branch-table-body" class="divide-y divide-slate-800/40">
+              <tr><td colspan="11" class="text-center py-6 text-slate-400">尚無資料</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VIEW 3: Volume by Price (分價量表) -->
+      <div id="view-profile-table" class="hidden border border-slate-800 rounded-2xl p-4 bg-slate-950/50 space-y-3">
+        <div class="flex items-center justify-between text-xs font-semibold">
+          <span class="text-slate-200">分價量能分佈 (Volume Profile)</span>
+          <span class="text-[11px] text-slate-400">紅: 買進量 / 綠: 賣出量 (以成交量加權)</span>
+        </div>
+        <div id="price-profile-container" class="space-y-1.5 num-tabular text-xs max-h-72 overflow-y-auto pr-1">
+          <div class="text-slate-400 text-center py-6 text-xs">請點擊上方按鈕載入或上傳分點 CSV 數據</div>
         </div>
       </div>
 
@@ -378,7 +443,7 @@
   </div>
 
   <div class="mt-4 text-center text-xs text-slate-400 space-y-1">
-    <p>支援台灣櫃買中心官方 MIS API · 內建分時走勢、日K均線、券商分點籌碼 CSV 匯入與 GitHub Pages 託管</p>
+    <p>資料取自台灣櫃買中心官方 MIS API · 內建分時走勢、日K均線、券商買賣超一鍵彙整 (VBA 對標版) 與 GitHub Pages</p>
   </div>
 
   <!-- Client-Side Engine -->
@@ -386,6 +451,14 @@
     let timer = null;
     let audioCtx = null;
     let currentTab = 'intraday';
+    let currentSubTab = 'parent';
+    let currentSortCol = 'net';
+    let currentSortAsc = false;
+    let currentGroupMode = 'smart';
+
+    let globalParentBrokers = [];
+    let globalBranchBrokers = [];
+    let globalPriceMap = {};
 
     let baselineData = {
       price: 621.0, yesterday: 605.0, open: 634.0, high: 664.0, low: 606.0,
@@ -393,6 +466,563 @@
       bids: ['620.00', '617.00', '615.00', '614.00', '613.00'], bidVols: [1, 1, 6, 25, 4],
       asks: ['621.00', '622.00', '623.00', '625.00', '626.00'], askVols: [1, 2, 5, 3, 2]
     };
+
+    const FOREIGN_CODES = new Set([
+      '1440', '1470', '1480', '1520', '1560', '1590', '1650', '8440', '8960',
+      '1360', '1380', '1530'
+    ]);
+
+    const BROKER_CODE_MAP = {
+      '1020': '合庫總公司', '1021': '合庫台中', '1022': '合庫台南', '1023': '合庫高雄', '1024': '合庫嘉義', '1025': '合庫彰化', '1028': '合庫屏東', '1029': '合庫鳳山', '102A': '合庫新竹', '102C': '合庫自強', '102E': '合庫羅東', '102F': '合庫北台中', '102G': '合庫三重',
+      '1031': '土銀台北', '1033': '土銀基隆', '1034': '土銀嘉義', '1035': '土銀新竹', '1037': '土銀花蓮', '103A': '土銀博愛', '103B': '土銀宜蘭', '103C': '土銀白河', '103F': '土銀南投',
+      '1040': '台銀總公司', '1042': '台銀台南', '1043': '台銀民生', '1045': '台銀新竹', '104A': '台銀台中', '104C': '台銀基隆', '104D': '台銀鳳山',
+      '1110': '台北富邦', '1111': '富邦台北', '1112': '富邦台南', '1113': '富邦九如', '1117': '富邦竹北', '1118': '富邦高雄', '1119': '富邦鳳山', '111E': '富邦嘉義', '111F': '富邦台中', '111G': '富邦東港',
+      '1230': '兆豐總公司', '1232': '兆豐七賢',
+      '1261': '宏遠忠孝', '1262': '宏遠信義', '126H': '宏遠金華', '126L': '宏遠台中', '126Q': '宏遠重慶', '126U': '宏遠員林', '126i': '宏遠高雄',
+      '1470': '台灣摩根士丹利', '1480': '美商高盛', '1560': '港商野村', '1590': '花旗環球', '1650': '瑞銀證券 (UBS)',
+      '2180': '國票總公司', '2184': '國票新竹', '2186': '國票高雄', '2187': '國票台中',
+      '5050': '大業證券', '5261': '光和中壢', '5262': '光和基隆', '5265': '光和彰化', '5266': '光和虎尾', '526A': '光和金華', '5320': '東亞證券', '5321': '東亞新竹',
+      '5380': '第一金證券', '5381': '第一金板橋', '5382': '第一金台中', '5383': '第一金彰化', '5384': '第一金台南', '5385': '第一金高雄', '5386': '第一金新竹', '5387': '第一金屏東', '5389': '第一金鳳山', '538A': '第一金新北', '538B': '第一金新店', '538C': '第一金台北', '538D': '第一金中壢', '538E': '第一金左營', '538I': '第一金潮州', '538M': '第一金嘉義', '538N': '第一金高雄', '538P': '第一金大里', '538W': '第一金員林', '538Y': '第一金虎尾', '538j': '第一金永康',
+      '5602': '致和高雄',
+      '5850': '統一總公司', '5851': '統一基隆', '5852': '統一台南', '5853': '統一虎尾', '5854': '統一彰化', '5855': '統一永康', '5856': '統一台中', '5857': '統一新竹', '5859': '統一屏東', '585A': '統一高雄', '585B': '統一金華', '585D': '統一北台中', '585F': '統一南投', '585H': '統一嘉義', '585I': '統一板橋', '585J': '統一三重', '585M': '統一雙和', '585P': '統一台中', '585Q': '統一三峽', '585R': '統一斗六', '585S': '統一潮州', '585U': '統一南京', '585W': '統一松江', '585Z': '統一七賢', '585b': '統一羅東', '585c': '統一苗栗', '585g': '統一中壢',
+      '5960': '聯成證券', '5962': '聯成南京',
+      '6012': '美好板橋', '601d': '美好高雄',
+      '6110': '台中銀總公司', '6114': '台中銀雙和',
+      '6160': '富邦民生', '6161': '富邦三重', '6162': '富邦高雄', '6163': '富邦板橋', '6164': '富邦嘉義', '6165': '富邦新竹', '6167': '富邦七賢', '6168': '富邦嘉義', '616A': '富邦虎尾', '616K': '富邦台中',
+      '6210': '新世紀證券', '6381': '福勝桃園', '6383': '福勝基隆', '6385': '福勝中壢', '638D': '福勝高雄', '6450': '大昌證券', '6451': '大昌安康', '6460': '大展證券', '6462': '大展中壢', '6463': '大展新竹', '6464': '大展新店', '6465': '大展高雄', '6620': '華南永昌總公司',
+      '7000': '兆豐總公司', '7001': '兆豐嘉義', '7003': '兆豐台中', '7005': '兆豐中壢', '7006': '兆豐台南', '7007': '兆豐竹北', '7008': '兆豐三重', '700B': '兆豐台中', '700C': '兆豐基隆', '700D': '兆豐高雄', '700H': '兆豐斗六', '700I': '兆豐台中', '700J': '兆豐仁愛', '700L': '兆豐天母', '700M': '兆豐嘉義', '700N': '兆豐東港', '700P': '兆豐南京', '700R': '兆豐小港', '700U': '兆豐客家', '700V': '兆豐新竹', '700W': '兆豐松山', '700X': '兆豐金華', '700Z': '兆豐高雄', '700a': '兆豐花蓮', '700b': '兆豐虎尾', '700c': '兆豐內湖', '700d': '兆豐宜蘭', '700f': '兆豐大甲', '700g': '兆豐南京', '700h': '兆豐三重', '700i': '兆豐光復', '700j': '兆豐大安', '700k': '兆豐雙和', '700r': '兆豐忠孝', '700s': '兆豐鳳山', '700w': '兆豐新莊',
+      '7034': '大慶嘉義', '703B': '大慶苗栗', '7750': '日進證券',
+      '7791': '康和台中', '7797': '康和高雄', '7798': '康和虎尾', '779D': '康和台南', '779E': '康和安康', '779H': '康和嘉義', '779P': '康和九如', '779V': '康和草屯', '779X': '康和金華', '779Z': '康和永康', '779c': '康和忠孝', '779j': '康和基隆', '779m': '康和高雄', '779n': '康和南京', '779r': '康和新莊', '779v': '康和台中', '779z': '康和信義',
+      '8440': '摩根大通 (小摩)',
+      '8450': '統一證券', '8451': '統一高雄', '8455': '統一台中', '8459': '統一嘉義', '845A': '統一新莊', '845B': '統一金華', '845D': '統一台中', '845E': '統一新竹', '845F': '統一苗栗', '845J': '統一花蓮', '845R': '統一成功', '845S': '統一安康', '845U': '統一台北', '845X': '統一屏東',
+      '8492': '永興嘉義',
+      '8560': '新光總公司', '8561': '新光台中', '8562': '新光高雄', '8563': '新光新竹', '8564': '新光台南', '8565': '新光花蓮',
+      '8580': '永豐金總公司', '8583': '永豐金建國', '8584': '永豐金金華', '8586': '永豐金大業', '8587': '永豐金信義',
+      '8711': '日盛成功', '8713': '日盛高雄',
+      '8840': '玉山總公司', '8841': '玉山金華', '8842': '玉山新竹', '8843': '玉山高雄', '8846': '玉山台中', '8847': '玉山台南', '8848': '玉山嘉義', '8849': '玉山新北', '884A': '玉山雙和', '884B': '玉山台中', '884C': '玉山仁愛', '884D': '玉山板橋', '884E': '玉山桃園', '884F': '玉山花蓮', '884H': '玉山新竹', '884J': '玉山大里', '884M': '玉山草屯',
+      '8880': '國泰總公司', '8881': '國泰台中', '8882': '國泰台北', '8883': '國泰七賢', '8884': '國泰台南', '8885': '國泰高雄', '8886': '國泰新竹', '8887': '國泰嘉義', '8888': '國泰敦南', '888A': '國泰員林', '888K': '國泰台中',
+      '9100': '群益總公司', '9101': '群益台南', '9105': '群益板橋', '9108': '群益鳳山', '910D': '群益高雄', '9131': '群益民生', '9134': '群益花蓮', '9135': '群益東門', '9136': '群益七賢', '9137': '群益雙和', '9138': '群益高雄', '913D': '群益彰化', '913E': '群益基隆', '913I': '群益土城', '913N': '群益宜蘭', '913R': '群益台中', '913U': '群益苗栗', '913Y': '群益員林', '913g': '群益三重',
+      '9183': '群益高雄', '9184': '群益台中', '9185': '群益台南', '9186': '群益新竹', '9187': '群益花蓮', '9188': '群益三重', '9189': '群益新莊', '918A': '群益虎尾', '918B': '群益台中', '918C': '群益大同', '918D': '群益斗六', '918E': '群益南京', '918G': '群益新竹', '918H': '群益鳳山', '918J': '群益金華', '918K': '群益斗六', '918L': '群益員林', '918M': '群益嘉義', '918P': '群益天母', '918W': '群益松江', '918X': '群益台北', '918c': '群益鳳山', '918g': '群益大里', '918i': '群益竹南', '918s': '群益高雄', '918u': '群益仁愛', '918z': '群益潮州',
+      '9200': '凱基總公司', '9202': '凱基中壢', '9204': '凱基台中', '9205': '凱基三重', '9206': '凱基高雄', '9207': '凱基金華', '9208': '凱基板橋', '9209': '凱基鳳山', '920A': '凱基台中', '920C': '凱基永康', '920F': '凱基站前', '920G': '凱基大里', '920H': '凱基新竹', '920M': '凱基潮州', '920N': '凱基基隆', '920V': '凱基新竹', '920W': '凱基大安', '920Z': '凱基台中',
+      '9211': '凱基台南', '9212': '凱基斗六', '9215': '凱基三重', '9216': '凱基仁愛', '9218': '凱基大里', '921C': '凱基民生', '921E': '凱基三峽', '921G': '凱基五權', '921J': '凱基宜蘭', '921M': '凱基苗栗', '921S': '凱基新竹',
+      '9223': '凱基平和', '9225': '凱基內湖', '9229': '凱基中山', '9231': '凱基雙和', '9233': '凱基新莊', '9234': '凱基竹北', '9236': '凱基高雄', '9237': '凱基彰化', '9238': '凱基雙和', '9239': '凱基民權',
+      '9252': '凱基嘉義', '9254': '凱基板橋', '9255': '凱基基隆', '9256': '凱基安康', '9257': '凱基羅東', '9258': '凱基台東', '9266': '凱基新店', '9268': '凱基台北', '9272': '凱基南投', '9273': '凱基竹南', '9274': '凱基鳳山', '9278': '凱基七賢', '9283': '凱基忠孝', '9285': '凱基虎尾', '9287': '凱基內湖', '9289': '凱基前金', '9291': '凱基大安', '9296': '凱基潮州', '9297': '凱基台南',
+      '9300': '亞東證券', '9302': '亞東台中', '9303': '亞東板橋', '9305': '亞東新竹', '9306': '亞東台南', '9307': '亞東大安', '9308': '亞東板橋', '9309': '亞東大同', '9312': '亞東民生', '9314': '亞東嘉義', '9315': '亞東大里', '9316': '亞東仁愛', '9317': '亞東羅東', '9319': '亞東成功', '9322': '亞東忠孝', '9323': '亞東小港', '9324': '亞東鳳山', '9325': '亞東高雄', '9326': '亞東南京', '9328': '亞東雙和', '9329': '亞東彰化', '9331': '亞東鳳山', '9332': '亞東新莊', '9333': '亞東信義', '9334': '亞東三重', '9337': '亞東虎尾', '9339': '亞東竹北', '9343': '亞東潮州', '9347': '亞東永康', '9349': '亞東台中', '9352': '亞東高雄', '9358': '亞東斗六', '9359': '亞東成功', '9363': '亞東新北', '9366': '亞東高雄', '9377': '亞東南京', '9386': '亞東成功',
+      '9600': '富邦總公司', '9604': '富邦新北', '9608': '富邦台中', '9614': '富邦高雄', '9616': '富邦新竹', '961C': '富邦南京', '961F': '富邦仁愛', '961H': '富邦新店', '961K': '富邦七賢', '961M': '富邦板橋', '961N': '富邦金華', '961P': '富邦基隆', '961R': '富邦安康', '961Y': '富邦潮州', '961Z': '富邦七賢',
+      '9621': '富邦花蓮', '9623': '富邦台北', '9624': '富邦竹北', '9625': '富邦竹南', '9627': '富邦台中', '962A': '富邦南京', '962B': '富邦三峽', '962C': '富邦斗六', '962D': '富邦新竹', '962E': '富邦雙和', '962G': '富邦五權', '962P': '富邦潮州', '962Q': '富邦大安', '9636': '富邦虎尾', '963A': '富邦苗栗', '963L': '富邦高雄', '9647': '富邦新莊', '9654': '富邦金華', '9655': '富邦台中', '9657': '富邦員林', '9658': '富邦大安', '9659': '富邦板橋', '965K': '富邦台中', '965U': '富邦竹南', '9661': '富邦新竹', '9663': '富邦台南', '9665': '富邦板橋', '9666': '富邦南京', '9667': '富邦台南', '966F': '富邦成功', '9672': '富邦雙和', '9676': '富邦苗栗', '9677': '富邦三重', '9686': '富邦潮州', '9692': '富邦嘉義', '9693': '富邦新竹', '9697': '富邦永康',
+      '9800': '元大總公司', '9801': '元大七賢', '980C': '元大五權', '980D': '元大台北', '980K': '元大南投', '980Q': '元大安康', '980R': '元大永康', '980a': '元大新莊', '980d': '元大斗六', '980e': '元大基隆', '980h': '元大台北', '980l': '元大高雄', '980u': '元大新竹', '980w': '元大板橋',
+      '9812': '元大台中', '9813': '元大前金', '9815': '元大七賢', '9816': '元大新竹', '9817': '元大斗六', '981A': '元大三峽', '981B': '元大竹北', '981C': '元大板橋', '981D': '元大南京', '981E': '元大安康', '981F': '元大羅東', '981G': '元大台中', '981I': '元大天母', '981K': '元大雙和', '981L': '元大板橋', '981M': '元大員林', '981N': '元大高雄', '981Q': '元大花蓮', '981R': '元大竹南', '981S': '元大苗栗', '981U': '元大成功', '981V': '元大金華', '981X': '元大新北', '981Z': '元大土城',
+      '9822': '元大新莊', '9825': '元大新竹', '9829': '元大南門', '982A': '元大草屯', '982B': '元大信義', '982C': '元大中山', '982F': '元大高雄',
+      '9831': '元大成功', '9833': '元大板橋', '9834': '元大虎尾', '9835': '元大民權', '9837': '元大台北', '9838': '元大高雄', '983B': '元大雙和', '983G': '元大西屯', '983K': '元大民生', '983M': '元大東門', '983N': '元大大安', '983U': '元大潮州', '983V': '元大竹南', '983W': '元大仁愛', '983Z': '元大鳳山', '983f': '元大竹南', '983i': '元大仁愛', '983j': '元大竹北',
+      '984C': '元大新竹', '984E': '元大安康', '984K': '元大員林', '9852': '元大草屯', '9853': '元大南京', '9854': '元大台中', '9856': '元大花蓮', '9857': '元大中壢', '9858': '元大新竹', '9859': '元大金華', '985C': '元大高雄', '985F': '元大鳳山', '9862': '元大南京', '9863': '元大基隆', '9867': '元大台南', '9868': '元大成功', '9869': '元大新莊', '986K': '元大基隆', '9871': '元大高雄', '9872': '元大雙和', '9874': '元大金華', '9875': '元大虎尾', '9878': '元大西屯', '9879': '元大台中', '987A': '元大仁愛', '9884': '元大永康', '9888': '元大安康', '9889': '元大雙和', '988B': '元大台北', '988C': '元大三重', '988V': '元大板橋', '9891': '元大金華', '9892': '元大屏東', '9893': '元大天母', '9894': '元大花蓮', '9896': '元大台南', '9897': '元大宜蘭', '9898': '元大新北', '9899': '元大仁愛', '989A': '元大台北', '989B': '元大中壢', '989C': '元大成功', '989D': '元大高雄', '989E': '元大民權', '989F': '元大三重', '989G': '元大西屯', '989I': '元大竹南', '989J': '元大草屯', '989L': '元大中壢', '989N': '元大中興', '989P': '元大東門', '989Q': '元大板橋', '989S': '元大金華', '989U': '元大仁愛', '989V': '元大三重', '989W': '元大雙和', '989X': '元大三重', '989Y': '元大成功', '989Z': '元大草屯', '989a': '元大新莊', '989d': '元大板橋', '989e': '元大金華', '989f': '元大斗六', '989g': '元大嘉義', '989j': '元大雙和', '989k': '元大中壢', '989m': '元大仁愛',
+      '9A00': '永豐金總公司', '9A61': '永豐金鳳山', '9A69': '永豐金屏東', '9A79': '永豐金仁愛', '9A89': '永豐金台北', '9A8F': '永豐金台南', '9A91': '永豐金中壢', '9A92': '永豐金土城', '9A97': '永豐金新莊', '9A98': '永豐金大安', '9A99': '永豐金敦南', '9A9A': '永豐金草屯', '9A9B': '永豐金金華', '9A9C': '永豐金雙和', '9A9D': '永豐金高雄', '9A9G': '永豐金天母', '9A9H': '永豐金新竹', '9A9J': '永豐金信義', '9A9K': '永豐金三重', '9A9L': '永豐金台中', '9A9M': '永豐金南京', '9A9N': '永豐金宜蘭', '9A9P': '永豐金竹北', '9A9Q': '永豐金高雄', '9A9R': '永豐金仁愛', '9A9S': '永豐金南京', '9A9U': '永豐金花蓮', '9A9W': '永豐金松江', '9A9X': '永豐金板橋', '9A9Y': '永豐金成功', '9A9a': '永豐金忠孝', '9A9b': '永豐金信義', '9A9c': '永豐金七賢', '9A9d': '永豐金大同', '9A9e': '永豐金高雄', '9A9g': '永豐金大安', '9A9h': '永豐金台南', '9A9i': '永豐金新竹', '9A9j': '永豐金嘉義', '9A9q': '永豐金西屯', '9A9r': '永豐金台北', '9A9x': '永豐金板橋',
+      '9B00': '國票總公司', '9B11': '國票新竹', '9B13': '國票三重', '9B15': '國票七賢', '9B16': '國票台南', '9B18': '國票板橋', '9B19': '國票新北', '9B1d': '國票高雄', '9B1g': '國票台中', '9B1h': '國票台北', '9B1n': '國票屏東', '9B1y': '國票虎尾', '9B20': '國票台北', '9B23': '國票三重', '9B25': '國票仁愛', '9B27': '國票雙和', '9B28': '國票新店', '9B29': '國票嘉義', '9B2A': '國票南京', '9B2B': '國票金華', '9B2C': '國票土城', '9B2D': '國票大安', '9B2E': '國票高雄', '9B2G': '國票新莊', '9B2H': '國票仁愛', '9B2I': '國票嘉義', '9B2L': '國票內湖', '9B2N': '國票板橋', '9B2P': '國票成功', '9B2Q': '國票南投', '9B2U': '國票潮州', '9B2W': '國票信義', '9B2X': '國票成功', '9B2Y': '國票仁愛', '9B2a': '國票安和', '9B2c': '國票七賢', '9B2i': '國票西屯', '9B2l': '國票大安', '9B2m': '國票草屯', '9B2n': '國票中壢', '9B2o': '國票新竹', '9B2q': '國票板橋', '9B2r': '國票大同', '9B2u': '國票金華', '9B2v': '國票高雄', '9B2w': '國票永康', '9B2y': '國票花蓮'
+    };
+
+    const PARENT_CORP_MAP = {
+      '98': '元大證券', '92': '凱基證券', '96': '富邦證券', '88': '國泰綜合', '58': '統一證券',
+      '9A': '永豐金證券', '70': '兆豐證券', '91': '群益金鼎', '9B': '國票證券', '884': '玉山證券',
+      '538': '第一金證券', '102': '合庫證券', '103': '土銀證券', '104': '台銀證券', '126': '宏遠證券',
+      '856': '新光證券', '779': '康和證券', '662': '華南永昌', '616': '富邦證券', '611': '台中銀證券'
+    };
+
+    function resolveBrokerName(code, rawName = '') {
+      if (BROKER_CODE_MAP[code]) return BROKER_CODE_MAP[code];
+      if (rawName && !rawName.includes('\uFFFD') && !rawName.includes('?') && rawName.length > 2) return rawName;
+      const pfx3 = code.slice(0, 3);
+      const pfx2 = code.slice(0, 2);
+      if (PARENT_CORP_MAP[pfx3]) return `${PARENT_CORP_MAP[pfx3]}分點`;
+      if (PARENT_CORP_MAP[pfx2]) return `${PARENT_CORP_MAP[pfx2]}分點`;
+      return `${code}分點`;
+    }
+
+    function isForeignBroker(code) {
+      return FOREIGN_CODES.has(code) || FOREIGN_CODES.has(code.slice(0, 2));
+    }
+
+    function getParentGroupInfo(code, name, mode = 'smart') {
+      const isFx = isForeignBroker(code);
+      let key = '';
+      let parentName = '';
+
+      if (mode === 'prefix2') {
+        key = code.slice(0, 2);
+        parentName = PARENT_CORP_MAP[key] || `${key}券商體系`;
+      } else if (mode === 'detail') {
+        key = code;
+        parentName = resolveBrokerName(code, name);
+      } else {
+        if (isFx) {
+          key = code;
+          parentName = resolveBrokerName(code, name);
+        } else {
+          key = code.slice(0, 2);
+          parentName = PARENT_CORP_MAP[key] || `${key}券商合計`;
+        }
+      }
+      return { key, parentName, isFx };
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      readCSVBuffer(file);
+    }
+
+    function readCSVBuffer(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const buffer = e.target.result;
+        let text = '';
+        const b = new Uint8Array(buffer);
+        if (b.length >= 3 && b[0] === 0xEF && b[1] === 0xBB && b[2] === 0xBF) {
+          text = new TextDecoder('utf-8').decode(buffer);
+        } else {
+          try {
+            const t = new TextDecoder('big5').decode(buffer);
+            if (!t.includes('\uFFFD')) text = t;
+          } catch (err) {}
+          if (!text) {
+            try {
+              const t = new TextDecoder('utf-8').decode(buffer);
+              if (!t.includes('\uFFFD')) text = t;
+            } catch (err) {}
+          }
+          if (!text) {
+            try { text = new TextDecoder('big5').decode(buffer); }
+            catch (err) { text = new TextDecoder('utf-8').decode(buffer); }
+          }
+        }
+        processBrokerCSV(text);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function processBrokerCSV(rawText) {
+      const normalized = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      const lines = normalized.split('\n');
+
+      let startRow = -1;
+      let stockId = '4971';
+
+      for (let i = 0; i < lines.length; i++) {
+        const l = lines[i].trim();
+        if (l.includes('證券代碼')) {
+          const parts = parseCSVLine(l);
+          if (parts.length > 1 && parts[1]) stockId = parts[1].trim();
+        }
+        if (l.startsWith('序號') || l.includes('序號')) {
+          startRow = i + 1;
+          break;
+        }
+      }
+      if (startRow === -1) startRow = 0;
+
+      const branchMap = {};
+      const parentMap = {};
+      const priceMap = {};
+
+      let totalBuyLots = 0;
+      let totalSellLots = 0;
+
+      for (let i = startRow; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const cols = parseCSVLine(line);
+        if (cols.length < 5) continue;
+
+        const rawBrokerStr = cols[1].trim();
+        const price = parseFloat(cols[2]);
+        const buyShares = parseFloat(cols[3]);
+        const sellShares = parseFloat(cols[4]);
+
+        if (isNaN(price) || isNaN(buyShares) || isNaN(sellShares)) continue;
+
+        let code = '';
+        let origName = '';
+        const sp = rawBrokerStr.indexOf(' ');
+        if (sp > 0) {
+          code = rawBrokerStr.slice(0, sp).trim();
+          origName = rawBrokerStr.slice(sp + 1).trim();
+        } else {
+          code = rawBrokerStr.slice(0, 4);
+          origName = rawBrokerStr.slice(4).trim();
+        }
+
+        const resolvedName = resolveBrokerName(code, origName);
+        const isFx = isForeignBroker(code);
+
+        totalBuyLots += buyShares;
+        totalSellLots += sellShares;
+
+        if (!priceMap[price]) priceMap[price] = { buy: 0, sell: 0, total: 0 };
+        priceMap[price].buy += buyShares;
+        priceMap[price].sell += sellShares;
+        priceMap[price].total += (buyShares + sellShares);
+
+        if (!branchMap[code]) {
+          branchMap[code] = {
+            code, name: resolvedName, isFx,
+            buyShares: 0, sellShares: 0, buyAmt: 0, sellAmt: 0
+          };
+        }
+        branchMap[code].buyShares += buyShares;
+        branchMap[code].sellShares += sellShares;
+        branchMap[code].buyAmt += (price * buyShares);
+        branchMap[code].sellAmt += (price * sellShares);
+
+        const groupInfo = getParentGroupInfo(code, origName, currentGroupMode);
+        const pKey = groupInfo.key;
+        if (!parentMap[pKey]) {
+          parentMap[pKey] = {
+            key: pKey,
+            name: groupInfo.parentName,
+            isFx: groupInfo.isFx,
+            branches: new Set(),
+            fxCount: 0,
+            domCount: 0,
+            buyShares: 0, sellShares: 0, buyAmt: 0, sellAmt: 0
+          };
+        }
+        parentMap[pKey].branches.add(code);
+        if (isFx) parentMap[pKey].fxCount++; else parentMap[pKey].domCount++;
+        parentMap[pKey].buyShares += buyShares;
+        parentMap[pKey].sellShares += sellShares;
+        parentMap[pKey].buyAmt += (price * buyShares);
+        parentMap[pKey].sellAmt += (price * sellShares);
+      }
+
+      globalBranchBrokers = Object.values(branchMap).map(b => {
+        const buyLots = b.buyShares / 1000;
+        const sellLots = b.sellShares / 1000;
+        const netLots = buyLots - sellLots;
+        const totalLots = buyLots + sellLots;
+        const buyAvg = b.buyShares > 0 ? (b.buyAmt / b.buyShares) : 0;
+        const sellAvg = b.sellShares > 0 ? (b.sellAmt / b.sellShares) : 0;
+        const diff = (b.buyShares > 0 && b.sellShares > 0) ? (sellAvg - buyAvg) : 0;
+        return {
+          code: b.code, name: b.name, isFx: b.isFx,
+          attr: b.isFx ? '外資' : '本土',
+          buyLots, sellLots, netLots, totalLots, buyAvg, sellAvg, diff
+        };
+      });
+
+      globalParentBrokers = Object.values(parentMap).map(p => {
+        const buyLots = p.buyShares / 1000;
+        const sellLots = p.sellShares / 1000;
+        const netLots = buyLots - sellLots;
+        const totalLots = buyLots + sellLots;
+        const buyAvg = p.buyShares > 0 ? (p.buyAmt / p.buyShares) : 0;
+        const sellAvg = p.sellShares > 0 ? (p.sellAmt / p.sellShares) : 0;
+        const diff = (p.buyShares > 0 && p.sellShares > 0) ? (sellAvg - buyAvg) : 0;
+
+        let attr = '本土';
+        if (p.fxCount > 0 && p.domCount > 0) attr = '混合';
+        else if (p.fxCount > 0) attr = '外資';
+
+        return {
+          key: p.key, name: p.name, attr,
+          branchCount: p.branches.size,
+          buyLots, sellLots, netLots, totalLots, buyAvg, sellAvg, diff
+        };
+      });
+
+      globalPriceMap = priceMap;
+
+      renderAllBrokerTables();
+      renderPriceProfile(priceMap);
+      renderSummaryBadges();
+    }
+
+    function parseCSVLine(text) {
+      const res = [];
+      let inQuote = false;
+      let field = '';
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (c === '"') {
+          if (inQuote && text[i + 1] === '"') { field += '"'; i++; }
+          else { inQuote = !inQuote; }
+        } else if (c === ',' && !inQuote) {
+          res.push(field);
+          field = '';
+        } else {
+          field += c;
+        }
+      }
+      res.push(field);
+      return res;
+    }
+
+    function renderAllBrokerTables() {
+      renderParentTable();
+      renderBranchTable();
+    }
+
+    function renderParentTable() {
+      const query = (document.getElementById('brokerSearchInput').value || '').trim().toLowerCase();
+      let list = [...globalParentBrokers];
+
+      if (query) {
+        list = list.filter(p => p.name.toLowerCase().includes(query) || p.key.toLowerCase().includes(query));
+      }
+
+      list.sort((a, b) => {
+        let valA = a[currentSortCol];
+        let valB = b[currentSortCol];
+        if (currentSortCol === 'rank') { valA = a.netLots; valB = b.netLots; }
+        return currentSortAsc ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+      });
+
+      const tbody = document.getElementById('parent-table-body');
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-6 text-slate-400">查無符合條件之主券商</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map((p, idx) => {
+        const rank = idx + 1;
+        const isBuyNet = p.netLots >= 0;
+        const netColor = isBuyNet ? 'text-rose-400' : 'text-emerald-400';
+        const diffColor = p.diff >= 0 ? 'text-rose-400' : 'text-emerald-400';
+        const attrBadge = p.attr === '外資'
+          ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">外資</span>'
+          : '<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400">本土</span>';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-2.5 text-slate-400 font-bold">${rank}</td>
+            <td class="p-2.5 font-semibold text-indigo-300">${p.key}</td>
+            <td class="p-2.5 font-bold text-white">${p.name}</td>
+            <td class="p-2.5">${attrBadge}</td>
+            <td class="p-2.5 text-center text-slate-400">${p.branchCount}</td>
+            <td class="p-2.5 text-right font-medium text-slate-200">${p.buyLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right font-medium text-slate-200">${p.sellLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right font-bold ${netColor}">${(isBuyNet ? '+' : '') + p.netLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right text-slate-400">${p.totalLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right text-slate-300">${p.buyAvg > 0 ? p.buyAvg.toFixed(2) : '-'}</td>
+            <td class="p-2.5 text-right text-slate-300">${p.sellAvg > 0 ? p.sellAvg.toFixed(2) : '-'}</td>
+            <td class="p-2.5 text-right font-semibold ${diffColor}">${p.diff !== 0 ? (p.diff > 0 ? '+' : '') + p.diff.toFixed(2) : '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderBranchTable() {
+      const query = (document.getElementById('brokerSearchInput').value || '').trim().toLowerCase();
+      let list = [...globalBranchBrokers];
+
+      if (query) {
+        list = list.filter(b => b.name.toLowerCase().includes(query) || b.code.toLowerCase().includes(query));
+      }
+
+      list.sort((a, b) => b.netLots - a.netLots);
+
+      const tbody = document.getElementById('branch-table-body');
+      tbody.innerHTML = list.slice(0, 100).map((b, idx) => {
+        const rank = idx + 1;
+        const isBuyNet = b.netLots >= 0;
+        const netColor = isBuyNet ? 'text-rose-400' : 'text-emerald-400';
+        const diffColor = b.diff >= 0 ? 'text-rose-400' : 'text-emerald-400';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-2.5 text-slate-400 font-bold">${rank}</td>
+            <td class="p-2.5 font-semibold text-indigo-300">${b.code}</td>
+            <td class="p-2.5 font-bold text-white">${b.name}</td>
+            <td class="p-2.5 text-slate-400">${b.attr}</td>
+            <td class="p-2.5 text-right text-slate-200">${b.buyLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right text-slate-200">${b.sellLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right font-bold ${netColor}">${(isBuyNet ? '+' : '') + b.netLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right text-slate-400">${b.totalLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right text-slate-300">${b.buyAvg > 0 ? b.buyAvg.toFixed(2) : '-'}</td>
+            <td class="p-2.5 text-right text-slate-300">${b.sellAvg > 0 ? b.sellAvg.toFixed(2) : '-'}</td>
+            <td class="p-2.5 text-right font-semibold ${diffColor}">${b.diff !== 0 ? (b.diff > 0 ? '+' : '') + b.diff.toFixed(2) : '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderPriceProfile(priceMap) {
+      const prices = Object.keys(priceMap).map(Number).sort((a, b) => b - a);
+      if (prices.length === 0) return;
+
+      let maxVol = 0;
+      let pocPrice = prices[0];
+      prices.forEach(p => {
+        if (priceMap[p].total > maxVol) {
+          maxVol = priceMap[p].total;
+          pocPrice = p;
+        }
+      });
+      document.getElementById('poc-price').textContent = `${pocPrice.toFixed(2)} 元`;
+
+      const html = prices.slice(0, 18).map(p => {
+        const item = priceMap[p];
+        const totalLots = Math.round(item.total / 1000);
+        const pct = Math.min(100, Math.round((item.total / maxVol) * 100));
+        const buyPct = item.total > 0 ? (item.buy / item.total) * 100 : 50;
+        const isPOC = (p === pocPrice);
+
+        return `
+          <div class="flex items-center gap-2 py-0.5">
+            <span class="w-16 text-[11px] font-bold ${isPOC ? 'text-amber-400 font-extrabold' : 'text-slate-300'}">${p.toFixed(2)} ${isPOC ? '★ POC' : ''}</span>
+            <div class="flex-1 h-3.5 bg-slate-900 rounded-md overflow-hidden flex relative">
+              <div class="bg-rose-500/70 h-full" style="width: ${pct * (buyPct / 100)}%;"></div>
+              <div class="bg-emerald-500/70 h-full" style="width: ${pct * ((100 - buyPct) / 100)}%;"></div>
+            </div>
+            <span class="w-20 text-right text-[11px] text-slate-400">${totalLots.toLocaleString()} 張</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('price-profile-container').innerHTML = html;
+    }
+
+    function renderSummaryBadges() {
+      const sorted = [...globalParentBrokers].sort((a, b) => b.netLots - a.netLots);
+      const top5Buyers = sorted.slice(0, 5).filter(b => b.netLots > 0);
+      const top5Sellers = [...sorted].reverse().slice(0, 5).filter(b => b.netLots < 0);
+
+      const top5BuyLots = Math.round(top5Buyers.reduce((acc, b) => acc + b.netLots, 0));
+      const top5SellLots = Math.round(top5Sellers.reduce((acc, b) => acc + Math.abs(b.netLots), 0));
+      const netSum = top5BuyLots - top5SellLots;
+
+      document.getElementById('top-buyer-sum').textContent = `+${top5BuyLots.toLocaleString()} 張`;
+      document.getElementById('top-seller-sum').textContent = `-${top5SellLots.toLocaleString()} 張`;
+      const netElem = document.getElementById('net-top-sum');
+      netElem.textContent = (netSum >= 0 ? '+' : '') + netSum.toLocaleString() + ' 張';
+      netElem.className = `text-base font-bold num-tabular mt-0.5 ${netSum >= 0 ? 'text-rose-400' : 'text-emerald-400'}`;
+    }
+
+    function switchSubTab(subTab) {
+      currentSubTab = subTab;
+      ['parent', 'branch', 'profile'].forEach(t => {
+        document.getElementById(`view-${t}-table`).classList.toggle('hidden', t !== subTab);
+        document.getElementById(`subtab-${t}`).classList.toggle('active', t === subTab);
+      });
+    }
+
+    function sortBrokerTable(col) {
+      if (currentSortCol === col) {
+        currentSortAsc = !currentSortAsc;
+      } else {
+        currentSortCol = col;
+        currentSortAsc = false;
+      }
+      renderParentTable();
+    }
+
+    function filterBrokerTable() {
+      renderParentTable();
+      renderBranchTable();
+    }
+
+    function changeGroupMode(mode) {
+      currentGroupMode = mode;
+      loadSampleCSVData();
+    }
+
+    function exportCleanCSV() {
+      if (globalParentBrokers.length === 0) {
+        alert('請先載入或上傳分點資料！');
+        return;
+      }
+      let csv = '\uFEFF排名,分組碼,主券商,屬性,分點數,買進(張),賣出(張),買賣超(張),總量(張),買均價,賣均價,均價差\n';
+      const sorted = [...globalParentBrokers].sort((a, b) => b.netLots - a.netLots);
+      sorted.forEach((p, idx) => {
+        csv += `"${idx + 1}","${p.key}","${p.name}","${p.attr}","${p.branchCount}","${p.buyLots.toFixed(2)}","${p.sellLots.toFixed(2)}","${p.netLots.toFixed(2)}","${p.totalLots.toFixed(2)}","${p.buyAvg.toFixed(2)}","${p.sellAvg.toFixed(2)}","${p.diff.toFixed(2)}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `4971_主券商買賣超彙整_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+    }
+
+    function loadSampleCSVData() {
+      const sampleCSV = `
+"1","1020 合庫","608","1000","0"
+"2","1020 合庫","612","0","1000"
+"3","1020 合庫","615","1500","0"
+"4","1020 合庫","620","1000","0"
+"5","1020 合庫","626","0","1000"
+"6","1021 合庫台中","607","0","1000"
+"7","1021 合庫台中","610","10","0"
+"15","1022 合庫台南","614","60","0"
+"20","1024 合庫嘉義","606","0","1000"
+"23","1024 合庫嘉義","622","1000","0"
+"177","1480 美商高盛","608","10000","8000"
+"178","1480 美商高盛","609","9000","0"
+"179","1480 美商高盛","610","1000","3000"
+"180","1480 美商高盛","611","1000","4000"
+"181","1480 美商高盛","612","3000","6000"
+"183","1480 美商高盛","614","4000","1000"
+"184","1480 美商高盛","615","5000","2000"
+"187","1480 美商高盛","618","1000","9000"
+"189","1480 美商高盛","620","4000","6000"
+"190","1480 美商高盛","621","1000","6000"
+"191","1480 美商高盛","622","1000","5000"
+"192","1480 美商高盛","623","4000","1"
+"195","1480 美商高盛","633","0","7000"
+"202","1650 瑞銀證券","608","3000","0"
+"203","1650 瑞銀證券","614","0","8000"
+"208","1650 瑞銀證券","619","0","8000"
+"210","1650 瑞銀證券","622","0","9000"
+"212","1650 瑞銀證券","624","0","8000"
+"213","1650 瑞銀證券","625","0","12000"
+"214","1650 瑞銀證券","626","0","15000"
+"364","5856 統一台中","608","2000","0"
+"365","5856 統一台中","611","6100","0"
+"366","5856 統一台中","612","5000","0"
+"367","5856 統一台中","613","10005","50"
+"368","5856 統一台中","614","3100","0"
+"369","5856 統一台中","615","1100","0"
+"370","5856 統一台中","616","2200","0"
+"1156","8888 國泰敦南","608","3256","6000"
+"1157","8888 國泰敦南","609","2125","5861"
+"1158","8888 國泰敦南","610","3147","13026"
+"1160","8888 國泰敦南","612","364","7190"
+"1161","8888 國泰敦南","613","4107","5218"
+"1162","8888 國泰敦南","614","4969","8002"
+"1163","8888 國泰敦南","615","7216","1711"
+"1164","8888 國泰敦南","616","5404","2453"
+"1166","8888 國泰敦南","618","5050","2082"
+"1170","8888 國泰敦南","622","13010","169"
+"1564","9268 凱基台北","608","10000","2050"
+"1568","9268 凱基台北","612","8000","3050"
+"1569","9268 凱基台北","613","6450","4000"
+"1570","9268 凱基台北","614","47035","9000"
+"1571","9268 凱基台北","615","3000","14000"
+"1572","9268 凱基台北","616","7030","11000"
+"1573","9268 凱基台北","617","4000","11000"
+"1574","9268 凱基台北","618","6000","14000"
+"1575","9268 凱基台北","619","7000","5000"
+"1577","9268 凱基台北","621","3000","11000"
+"1578","9268 凱基台北","622","5050","6000"
+"1579","9268 凱基台北","623","9000","9000"
+"1580","9268 凱基台北","624","8000","25000"
+"1581","9268 凱基台北","625","5000","16000"
+"1582","9268 凱基台北","626","1000","7000"
+"1585","9268 凱基台北","630","0","18000"
+"2144","9800 元大證券","610","47000","13006"
+"2145","9800 元大證券","611","13000","9383"
+"2146","9800 元大證券","612","6000","11724"
+"2147","9800 元大證券","613","10513","28349"
+"2148","9800 元大證券","614","25855","17360"
+"2149","9800 元大證券","615","13050","14186"
+"2150","9800 元大證券","616","8125","10785"
+"2153","9800 元大證券","619","9000","17076"
+"2154","9800 元大證券","620","7000","16917"
+"2155","9800 元大證券","621","8000","14381"
+"2156","9800 元大證券","622","13202","15495"
+"2157","9800 元大證券","623","5326","8555"
+"2158","9800 元大證券","624","1000","23361"
+"2159","9800 元大證券","625","27267","16090"
+"2160","9800 元大證券","626","8000","11058"
+"2161","9800 元大證券","627","14000","13000"
+      `.trim();
+      processBrokerCSV(sampleCSV);
+    }
 
     function switchTab(tab) {
       currentTab = tab;
@@ -408,7 +1038,7 @@
         legend.textContent = '黃: MA5 | 藍: MA10 | 紫: MA20';
         drawKlineChart();
       } else {
-        legend.textContent = '分點籌碼與分價量能密集區 (POC)';
+        legend.textContent = '主券商買賣超合計 & 加權買賣均價差';
       }
     }
 
@@ -745,194 +1375,12 @@
       ctx.stroke();
     }
 
-    function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      readCSVFile(file);
-    }
-
-    function readCSVFile(file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const buffer = e.target.result;
-        let text = '';
-        try {
-          const big5Decoder = new TextDecoder('big5');
-          text = big5Decoder.decode(buffer);
-          if (text.includes('')) {
-            text = new TextDecoder('utf-8').decode(buffer);
-          }
-        } catch (err) {
-          text = new TextDecoder('utf-8').decode(buffer);
-        }
-        processCSVContent(text);
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function processCSVContent(csvText) {
-      const lines = csvText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-      const priceMap = {};
-      const brokerMap = {};
-
-      lines.forEach(line => {
-        const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
-        if (cols.length < 5) return;
-        const broker = cols[1];
-        const price = parseFloat(cols[2]);
-        const buy = parseInt(cols[3], 10);
-        const sell = parseInt(cols[4], 10);
-
-        if (isNaN(price) || isNaN(buy) || isNaN(sell)) return;
-
-        if (!priceMap[price]) priceMap[price] = { buy: 0, sell: 0, total: 0 };
-        priceMap[price].buy += buy;
-        priceMap[price].sell += sell;
-        priceMap[price].total += (buy + sell);
-
-        if (!brokerMap[broker]) brokerMap[broker] = { buy: 0, sell: 0, net: 0 };
-        brokerMap[broker].buy += buy;
-        brokerMap[broker].sell += sell;
-        brokerMap[broker].net += (buy - sell);
-      });
-
-      renderChipsAnalysis(priceMap, brokerMap);
-    }
-
-    function renderChipsAnalysis(priceMap, brokerMap) {
-      const prices = Object.keys(priceMap).map(Number).sort((a, b) => b - a);
-      if (prices.length === 0) return;
-
-      let maxVol = 0;
-      let pocPrice = prices[0];
-      prices.forEach(p => {
-        if (priceMap[p].total > maxVol) {
-          maxVol = priceMap[p].total;
-          pocPrice = p;
-        }
-      });
-      document.getElementById('poc-price').textContent = `${pocPrice.toFixed(2)} 元`;
-
-      const profileHTML = prices.slice(0, 16).map(p => {
-        const item = priceMap[p];
-        const totalLots = Math.round(item.total / 1000);
-        const pct = Math.min(100, Math.round((item.total / maxVol) * 100));
-        const buyPct = item.total > 0 ? (item.buy / item.total) * 100 : 50;
-        const isPOC = (p === pocPrice);
-
-        return `
-          <div class="flex items-center gap-2 py-0.5">
-            <span class="w-14 text-[11px] font-bold ${isPOC ? 'text-amber-400 font-extrabold' : 'text-slate-300'}">${p.toFixed(2)} ${isPOC ? '★' : ''}</span>
-            <div class="flex-1 h-3.5 bg-slate-900 rounded-md overflow-hidden flex relative">
-              <div class="bg-rose-500/70 h-full" style="width: ${pct * (buyPct / 100)}%;"></div>
-              <div class="bg-emerald-500/70 h-full" style="width: ${pct * ((100 - buyPct) / 100)}%;"></div>
-            </div>
-            <span class="w-16 text-right text-[11px] text-slate-400">${totalLots} 張</span>
-          </div>
-        `;
-      }).join('');
-      document.getElementById('price-profile-container').innerHTML = profileHTML;
-
-      const brokers = Object.keys(brokerMap).map(name => ({
-        name, buy: brokerMap[name].buy, sell: brokerMap[name].sell, net: brokerMap[name].net
-      }));
-
-      const topBuyers = [...brokers].sort((a, b) => b.net - a.net).slice(0, 10).filter(b => b.net > 0);
-      const topSellers = [...brokers].sort((a, b) => a.net - b.net).slice(0, 10).filter(b => b.net < 0);
-
-      document.getElementById('buyer-list').innerHTML = topBuyers.map((b, i) => `
-        <div class="px-3 py-1.5 flex justify-between items-center hover:bg-slate-800/40 transition">
-          <div class="flex items-center gap-2">
-            <span class="w-4 text-[10px] text-slate-400 font-bold">${i + 1}</span>
-            <span class="font-medium text-slate-200">${b.name}</span>
-          </div>
-          <div class="text-right">
-            <span class="font-bold text-rose-400">+${Math.round(b.net / 1000)}</span>
-            <span class="text-[10px] text-slate-400 ml-1">(${Math.round(b.buy / 1000)}/${Math.round(b.sell / 1000)})</span>
-          </div>
-        </div>
-      `).join('') || '<div class="text-slate-400 text-center py-4 text-xs">無買超紀錄</div>';
-
-      document.getElementById('seller-list').innerHTML = topSellers.map((b, i) => `
-        <div class="px-3 py-1.5 flex justify-between items-center hover:bg-slate-800/40 transition">
-          <div class="flex items-center gap-2">
-            <span class="w-4 text-[10px] text-slate-400 font-bold">${i + 1}</span>
-            <span class="font-medium text-slate-200">${b.name}</span>
-          </div>
-          <div class="text-right">
-            <span class="font-bold text-emerald-400">${Math.round(b.net / 1000)}</span>
-            <span class="text-[10px] text-slate-400 ml-1">(${Math.round(b.sell / 1000)}/${Math.round(b.buy / 1000)})</span>
-          </div>
-        </div>
-      `).join('') || '<div class="text-slate-400 text-center py-4 text-xs">無賣超紀錄</div>';
-
-      const top5BuyLots = Math.round(topBuyers.slice(0, 5).reduce((acc, b) => acc + b.net, 0) / 1000);
-      const top5SellLots = Math.round(topSellers.slice(0, 5).reduce((acc, b) => acc + Math.abs(b.net), 0) / 1000);
-      document.getElementById('top-buyer-sum').textContent = `+${top5BuyLots} 張`;
-      document.getElementById('top-seller-sum').textContent = `-${top5SellLots} 張`;
-      const netSum = top5BuyLots - top5SellLots;
-      const netElem = document.getElementById('net-top-sum');
-      netElem.textContent = (netSum >= 0 ? '+' : '') + netSum + ' 張';
-      netElem.className = `text-base font-bold num-tabular mt-0.5 ${netSum >= 0 ? 'text-rose-400' : 'text-emerald-400'}`;
-    }
-
-    function loadSampleCSVData() {
-      const sampleCSV = `
-"1","1020 合庫","608","1000","0"
-"2","1020 合庫","612","0","1000"
-"3","1020 合庫","615","1500","0"
-"4","1020 合庫","620","1000","0"
-"5","1020 合庫","626","0","1000"
-"177","1480 美商高盛","608","10000","8000"
-"178","1480 美商高盛","609","9000","0"
-"179","1480 美商高盛","610","1000","3000"
-"180","1480 美商高盛","611","1000","4000"
-"181","1480 美商高盛","612","3000","6000"
-"183","1480 美商高盛","614","4000","1000"
-"184","1480 美商高盛","615","5000","2000"
-"190","1480 美商高盛","621","1000","6000"
-"191","1480 美商高盛","622","1000","5000"
-"1156","8888 國泰敦南","608","3256","6000"
-"1158","8888 國泰敦南","610","3147","13026"
-"1161","8888 國泰敦南","613","4107","5218"
-"1162","8888 國泰敦南","614","4969","8002"
-"1163","8888 國泰敦南","615","7216","1711"
-"1164","8888 國泰敦南","616","5404","2453"
-"1170","8888 國泰敦南","622","13010","169"
-"1564","9268 凱基台北","608","10000","2050"
-"1568","9268 凱基台北","612","8000","3050"
-"1569","9268 凱基台北","613","6450","4000"
-"1570","9268 凱基台北","614","47035","9000"
-"1571","9268 凱基台北","615","3000","14000"
-"1572","9268 凱基台北","616","7030","11000"
-"1573","9268 凱基台北","617","4000","11000"
-"1574","9268 凱基台北","618","6000","14000"
-"1575","9268 凱基台北","619","7000","5000"
-"1577","9268 凱基台北","621","3000","11000"
-"1578","9268 凱基台北","622","5050","6000"
-"1579","9268 凱基台北","623","9000","9000"
-"1580","9268 凱基台北","624","8000","25000"
-"1581","9268 凱基台北","625","5000","16000"
-"1582","9268 凱基台北","626","1000","7000"
-"1585","9268 凱基台北","630","0","18000"
-"2144","9800 元大","610","47000","13006"
-"2147","9800 元大","613","10513","28349"
-"2148","9800 元大","614","25855","17360"
-"2149","9800 元大","615","13050","14186"
-"2150","9800 元大","616","8125","10785"
-"2156","9800 元大","622","13202","15495"
-"2159","9800 元大","625","27267","16090"
-"2161","9800 元大","627","14000","13000"
-      `.trim();
-      processCSVContent(sampleCSV);
-    }
-
     window.addEventListener('dragover', (e) => e.preventDefault());
     window.addEventListener('drop', (e) => {
       e.preventDefault();
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         switchTab('chips');
-        readCSVFile(e.dataTransfer.files[0]);
+        readCSVBuffer(e.dataTransfer.files[0]);
       }
     });
 
