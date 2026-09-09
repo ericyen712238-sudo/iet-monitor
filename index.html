@@ -255,7 +255,7 @@
               <span>✨ 重新載入 4971 今日 3,350 筆完整分點明細</span>
             </button>
             <button onclick="exportCleanCSV()" class="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition flex items-center gap-1.5">
-              <span>📥 匯出 Excel 相容 CSV (無亂碼)</span>
+              <span>📥 匯出分點明細 CSV (Excel 無亂碼)</span>
             </button>
           </div>
         </div>
@@ -264,15 +264,15 @@
       <!-- Chip Summary Cards -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
         <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-          <div class="text-slate-400 text-[11px]">主力買超前 5 大</div>
+          <div class="text-slate-400 text-[11px]">主力買超前 5 大分點</div>
           <div id="top-buyer-sum" class="text-base font-bold text-rose-400 num-tabular mt-0.5">-- 張</div>
         </div>
         <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-          <div class="text-slate-400 text-[11px]">主力賣超前 5 大</div>
+          <div class="text-slate-400 text-[11px]">主力賣超前 5 大分點</div>
           <div id="top-seller-sum" class="text-base font-bold text-emerald-400 num-tabular mt-0.5">-- 張</div>
         </div>
         <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
-          <div class="text-slate-400 text-[11px]">前 5 大買賣超淨額</div>
+          <div class="text-slate-400 text-[11px]">前 5 大分點淨買賣超</div>
           <div id="net-top-sum" class="text-base font-bold text-slate-200 num-tabular mt-0.5">-- 張</div>
         </div>
         <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
@@ -344,17 +344,14 @@
         </div>
       </div>
 
-      <!-- Report View Controls (Matching VBA Sheets: 主券商合計 / 分點彙整 / 分價量表) -->
+      <!-- Report View Controls -->
       <div class="space-y-2 pt-2 border-t border-slate-800">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <!-- Subtab Buttons -->
           <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400 font-semibold">彙整視圖:</span>
-            <button id="subtab-parent" onclick="switchSubTab('parent')" class="subtab-btn active px-3 py-1 rounded-lg border border-slate-700 text-xs font-semibold transition">
-              主券商合計 (智慧分組)
-            </button>
-            <button id="subtab-branch" onclick="switchSubTab('branch')" class="subtab-btn px-3 py-1 rounded-lg border border-slate-700 text-xs font-semibold text-slate-400 hover:text-white transition">
-              分點彙整明細
+            <span class="text-xs text-slate-400 font-semibold">視圖:</span>
+            <button id="subtab-branch" onclick="switchSubTab('branch')" class="subtab-btn active px-3 py-1 rounded-lg border border-slate-700 text-xs font-semibold transition">
+              券商分點買賣超明細
             </button>
             <button id="subtab-profile" onclick="switchSubTab('profile')" class="subtab-btn px-3 py-1 rounded-lg border border-slate-700 text-xs font-semibold text-slate-400 hover:text-white transition">
               分價量能分佈 (POC)
@@ -363,19 +360,14 @@
 
           <!-- Filter & Search -->
           <div class="flex items-center gap-2">
-            <input id="brokerSearchInput" type="text" placeholder="搜尋券商名稱或代號..." oninput="filterBrokerTable()" class="px-2.5 py-1 text-xs rounded-lg border border-slate-700 bg-slate-800 text-white outline-none focus:border-indigo-500 w-44">
-            <select id="groupModeSelect" onchange="changeGroupMode(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2 py-1 text-xs outline-none">
-              <option value="smart" selected>智慧模式 (外資獨立/本土前兩碼)</option>
-              <option value="prefix2">全部取前兩碼</option>
-              <option value="detail">完全不分組 (分點獨立)</option>
-            </select>
+            <input id="brokerSearchInput" type="text" placeholder="搜尋分點名稱或代號..." oninput="filterBrokerTable()" class="px-2.5 py-1 text-xs rounded-lg border border-slate-700 bg-slate-800 text-white outline-none focus:border-indigo-500 w-52">
           </div>
         </div>
 
         <!-- 快捷排行篩選按鈕列 -->
         <div class="flex flex-wrap items-center gap-1.5 pt-1">
           <span class="text-[11px] text-slate-400 font-semibold mr-1">快捷榜單:</span>
-          <button id="qf-all" onclick="setQuickFilter('all')" class="qf-btn px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 transition">全部券商</button>
+          <button id="qf-all" onclick="setQuickFilter('all')" class="qf-btn px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 transition">全部分點</button>
           <button id="qf-total" onclick="setQuickFilter('total')" class="qf-btn px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-900 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition">🔥 買+賣最多 (成交量)</button>
           <button id="qf-buyNet" onclick="setQuickFilter('buyNet')" class="qf-btn px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-900 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 transition">🔴 買超最多 (淨買入)</button>
           <button id="qf-sellNet" onclick="setQuickFilter('sellNet')" class="qf-btn px-2.5 py-0.5 rounded-lg text-xs font-semibold bg-slate-900 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 transition">🟢 賣超最多 (淨賣出)</button>
@@ -384,17 +376,15 @@
         </div>
       </div>
 
-      <!-- VIEW 1: Parent Broker Summary Table (對應 VBA SH_PAR 主券商合計) -->
-      <div id="view-parent-table" class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/60">
-        <div class="overflow-x-auto max-h-96">
+      <!-- 券商分點買賣超明細表 -->
+      <div id="view-branch-table" class="border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/60">
+        <div class="overflow-x-auto max-h-[500px]">
           <table class="w-full text-left text-xs num-tabular border-collapse">
             <thead class="bg-slate-900/90 sticky top-0 text-[11px] text-slate-400 border-b border-slate-800 select-none">
               <tr>
                 <th class="p-2.5 cursor-pointer hover:text-white" onclick="sortBrokerTable('rank')">排名 ⬍</th>
-                <th class="p-2.5 cursor-pointer hover:text-white" onclick="sortBrokerTable('code')">分組碼 ⬍</th>
-                <th class="p-2.5">主券商名稱</th>
-                <th class="p-2.5">屬性</th>
-                <th class="p-2.5 text-center">分點數</th>
+                <th class="p-2.5 cursor-pointer hover:text-white" onclick="sortBrokerTable('code')">券商代號 ⬍</th>
+                <th class="p-2.5 cursor-pointer hover:text-white" onclick="sortBrokerTable('name')">分點名稱 ⬍</th>
                 <th class="p-2.5 text-right cursor-pointer hover:text-white" onclick="sortBrokerTable('buy')">買進(張) ⬍</th>
                 <th class="p-2.5 text-right cursor-pointer hover:text-white" onclick="sortBrokerTable('sell')">賣出(張) ⬍</th>
                 <th class="p-2.5 text-right cursor-pointer hover:text-white font-bold text-slate-200" onclick="sortBrokerTable('net')">買賣超(張) ⬍</th>
@@ -404,34 +394,8 @@
                 <th class="p-2.5 text-right cursor-pointer hover:text-white" onclick="sortBrokerTable('diff')">均價差 ⬍</th>
               </tr>
             </thead>
-            <tbody id="parent-table-body" class="divide-y divide-slate-800/40">
-              <tr><td colspan="12" class="text-center py-6 text-slate-400">正在處理資料...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- VIEW 2: Branch Detail Table (對應 VBA SH_BR 分點彙整) -->
-      <div id="view-branch-table" class="hidden border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/60">
-        <div class="overflow-x-auto max-h-96">
-          <table class="w-full text-left text-xs num-tabular border-collapse">
-            <thead class="bg-slate-900/90 sticky top-0 text-[11px] text-slate-400 border-b border-slate-800 select-none">
-              <tr>
-                <th class="p-2.5">排名</th>
-                <th class="p-2.5">券商代號</th>
-                <th class="p-2.5">分點名稱</th>
-                <th class="p-2.5">屬性</th>
-                <th class="p-2.5 text-right">買進(張)</th>
-                <th class="p-2.5 text-right">賣出(張)</th>
-                <th class="p-2.5 text-right font-bold text-slate-200">買賣超(張)</th>
-                <th class="p-2.5 text-right">總量(張)</th>
-                <th class="p-2.5 text-right">買均價</th>
-                <th class="p-2.5 text-right">賣均價</th>
-                <th class="p-2.5 text-right">均價差</th>
-              </tr>
-            </thead>
             <tbody id="branch-table-body" class="divide-y divide-slate-800/40">
-              <tr><td colspan="11" class="text-center py-6 text-slate-400">尚無資料</td></tr>
+              <tr><td colspan="10" class="text-center py-6 text-slate-400">正在處理分點資料...</td></tr>
             </tbody>
           </table>
         </div>
@@ -527,14 +491,12 @@
     let timer = null;
     let audioCtx = null;
     let currentTab = 'intraday';
-    let currentSubTab = 'parent';
+    let currentSubTab = 'branch';
     let currentSortCol = 'netLots';
     let currentSortAsc = false;
     let currentQuickFilter = 'all';
-    let currentGroupMode = 'smart';
 
     // 彙整分析數據暫存
-    let globalParentBrokers = [];
     let globalBranchBrokers = [];
     let globalPriceMap = {};
 
@@ -771,30 +733,9 @@
         branchMap[code].sellShares += sellShares;
         branchMap[code].buyAmt += (price * buyShares);
         branchMap[code].sellAmt += (price * sellShares);
-
-        // 3. 主券商聚合 (智慧分組)
-        const groupInfo = getParentGroupInfo(code, origName, currentGroupMode);
-        const pKey = groupInfo.key;
-        if (!parentMap[pKey]) {
-          parentMap[pKey] = {
-            key: pKey,
-            name: groupInfo.parentName,
-            isFx: groupInfo.isFx,
-            branches: new Set(),
-            fxCount: 0,
-            domCount: 0,
-            buyShares: 0, sellShares: 0, buyAmt: 0, sellAmt: 0
-          };
-        }
-        parentMap[pKey].branches.add(code);
-        if (isFx) parentMap[pKey].fxCount++; else parentMap[pKey].domCount++;
-        parentMap[pKey].buyShares += buyShares;
-        parentMap[pKey].sellShares += sellShares;
-        parentMap[pKey].buyAmt += (price * buyShares);
-        parentMap[pKey].sellAmt += (price * sellShares);
       }
 
-      // 整理分點列表
+      // 整理分點列表 (無分組碼、無外資標籤干擾，完整呈現真實分點)
       globalBranchBrokers = Object.values(branchMap).map(b => {
         const buyLots = b.buyShares / 1000;
         const sellLots = b.sellShares / 1000;
@@ -804,29 +745,8 @@
         const sellAvg = b.sellShares > 0 ? (b.sellAmt / b.sellShares) : 0;
         const diff = (b.buyShares > 0 && b.sellShares > 0) ? (sellAvg - buyAvg) : 0;
         return {
-          code: b.code, name: b.name, isFx: b.isFx,
-          attr: b.isFx ? '外資' : '本土',
-          buyLots, sellLots, netLots, totalLots, buyAvg, sellAvg, diff
-        };
-      });
-
-      // 整理主券商列表 (完全比照 VBA BrokerNetFlow 計算指標)
-      globalParentBrokers = Object.values(parentMap).map(p => {
-        const buyLots = p.buyShares / 1000;
-        const sellLots = p.sellShares / 1000;
-        const netLots = buyLots - sellLots;
-        const totalLots = buyLots + sellLots;
-        const buyAvg = p.buyShares > 0 ? (p.buyAmt / p.buyShares) : 0;
-        const sellAvg = p.sellShares > 0 ? (p.sellAmt / p.sellShares) : 0;
-        const diff = (p.buyShares > 0 && p.sellShares > 0) ? (sellAvg - buyAvg) : 0;
-
-        let attr = '本土';
-        if (p.fxCount > 0 && p.domCount > 0) attr = '混合';
-        else if (p.fxCount > 0) attr = '外資';
-
-        return {
-          key: p.key, name: p.name, attr,
-          branchCount: p.branches.size,
+          code: b.code,
+          name: b.name,
           buyLots, sellLots, netLots, totalLots, buyAvg, sellAvg, diff
         };
       });
@@ -862,74 +782,11 @@
     // ==========================================
     // 表格渲染與互動 (主券商合計 & 分點彙整)
     // ==========================================
+    // ==========================================
+    // 券商分點表格渲染與互動
+    // ==========================================
     function renderAllBrokerTables() {
-      renderParentTable();
       renderBranchTable();
-    }
-
-    function renderParentTable() {
-      const query = (document.getElementById('brokerSearchInput').value || '').trim().toLowerCase();
-      let list = [...globalParentBrokers];
-
-      if (query) {
-        list = list.filter(p => p.name.toLowerCase().includes(query) || p.key.toLowerCase().includes(query));
-      }
-
-      // 快捷榜單篩選
-      if (currentQuickFilter === 'buyNet') {
-        list = list.filter(p => p.netLots > 0);
-      } else if (currentQuickFilter === 'sellNet') {
-        list = list.filter(p => p.netLots < 0);
-      }
-
-      // 排序
-      list.sort((a, b) => {
-        if (currentQuickFilter === 'sellNet' && currentSortCol === 'netLots') {
-          // 賣超最多者排第 1 (絕對值最大者在前)
-          return currentSortAsc ? (b.netLots - a.netLots) : (a.netLots - b.netLots);
-        }
-        let valA = a[currentSortCol];
-        let valB = b[currentSortCol];
-        if (typeof valA === 'string') {
-          return currentSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-        }
-        return currentSortAsc ? (valA - valB) : (valB - valA);
-      });
-
-      const tbody = document.getElementById('parent-table-body');
-      if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-6 text-slate-400">查無符合條件之主券商</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = list.map((p, idx) => {
-        const rank = idx + 1;
-        const isBuyNet = p.netLots >= 0;
-        const netColor = isBuyNet ? 'text-rose-400' : 'text-emerald-400';
-        const diffColor = p.diff >= 0 ? 'text-rose-400' : 'text-emerald-400';
-        const attrBadge = p.attr === '外資'
-          ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">外資</span>'
-          : (p.attr === '混合'
-            ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">混合</span>'
-            : '<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400">本土</span>');
-
-        return `
-          <tr class="hover:bg-slate-800/40 transition">
-            <td class="p-2.5 text-slate-400 font-bold">${rank}</td>
-            <td class="p-2.5 font-semibold text-indigo-300">${p.key}</td>
-            <td class="p-2.5 font-bold text-white cursor-pointer hover:text-indigo-400 transition" onclick="quickSearchBroker('${p.name}')">${p.name}</td>
-            <td class="p-2.5">${attrBadge}</td>
-            <td class="p-2.5 text-center text-slate-400">${p.branchCount}</td>
-            <td class="p-2.5 text-right font-medium text-slate-200">${p.buyLots.toFixed(1)}</td>
-            <td class="p-2.5 text-right font-medium text-slate-200">${p.sellLots.toFixed(1)}</td>
-            <td class="p-2.5 text-right font-bold ${netColor}">${(isBuyNet ? '+' : '') + p.netLots.toFixed(1)}</td>
-            <td class="p-2.5 text-right font-bold text-amber-300/90">${p.totalLots.toFixed(1)}</td>
-            <td class="p-2.5 text-right text-slate-300">${p.buyAvg > 0 ? p.buyAvg.toFixed(2) : '-'}</td>
-            <td class="p-2.5 text-right text-slate-300">${p.sellAvg > 0 ? p.sellAvg.toFixed(2) : '-'}</td>
-            <td class="p-2.5 text-right font-semibold ${diffColor}">${p.diff !== 0 ? (p.diff > 0 ? '+' : '') + p.diff.toFixed(2) : '-'}</td>
-          </tr>
-        `;
-      }).join('');
     }
 
     function renderBranchTable() {
@@ -940,6 +797,7 @@
         list = list.filter(b => b.name.toLowerCase().includes(query) || b.code.toLowerCase().includes(query));
       }
 
+      // 快捷榜單篩選
       if (currentQuickFilter === 'buyNet') {
         list = list.filter(b => b.netLots > 0);
       } else if (currentQuickFilter === 'sellNet') {
@@ -949,10 +807,11 @@
       // 排序
       list.sort((a, b) => {
         if (currentQuickFilter === 'sellNet' && currentSortCol === 'netLots') {
+          // 賣超最多者排第 1 (絕對值最大者在最前)
           return currentSortAsc ? (b.netLots - a.netLots) : (a.netLots - b.netLots);
         }
-        let valA = a[currentSortCol] !== undefined ? a[currentSortCol] : a.netLots;
-        let valB = b[currentSortCol] !== undefined ? b[currentSortCol] : b.netLots;
+        let valA = a[currentSortCol];
+        let valB = b[currentSortCol];
         if (typeof valA === 'string') {
           return currentSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
         }
@@ -960,7 +819,12 @@
       });
 
       const tbody = document.getElementById('branch-table-body');
-      tbody.innerHTML = list.slice(0, 100).map((b, idx) => {
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-slate-400">查無符合條件之券商分點</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map((b, idx) => {
         const rank = idx + 1;
         const isBuyNet = b.netLots >= 0;
         const netColor = isBuyNet ? 'text-rose-400' : 'text-emerald-400';
@@ -969,11 +833,10 @@
         return `
           <tr class="hover:bg-slate-800/40 transition">
             <td class="p-2.5 text-slate-400 font-bold">${rank}</td>
-            <td class="p-2.5 font-semibold text-indigo-300">${b.code}</td>
+            <td class="p-2.5 font-semibold text-indigo-300 font-mono">${b.code}</td>
             <td class="p-2.5 font-bold text-white cursor-pointer hover:text-indigo-400 transition" onclick="quickSearchBroker('${b.name}')">${b.name}</td>
-            <td class="p-2.5 text-slate-400">${b.attr}</td>
-            <td class="p-2.5 text-right text-slate-200">${b.buyLots.toFixed(1)}</td>
-            <td class="p-2.5 text-right text-slate-200">${b.sellLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right font-medium text-slate-200">${b.buyLots.toFixed(1)}</td>
+            <td class="p-2.5 text-right font-medium text-slate-200">${b.sellLots.toFixed(1)}</td>
             <td class="p-2.5 text-right font-bold ${netColor}">${(isBuyNet ? '+' : '') + b.netLots.toFixed(1)}</td>
             <td class="p-2.5 text-right font-bold text-amber-300/90">${b.totalLots.toFixed(1)}</td>
             <td class="p-2.5 text-right text-slate-300">${b.buyAvg > 0 ? b.buyAvg.toFixed(2) : '-'}</td>
@@ -1019,18 +882,18 @@
       document.getElementById('price-profile-container').innerHTML = html;
     }
 
-    // 渲染三大焦點榜 (買+賣最多 / 買超最多 / 賣超最多) & 統計卡片
+    // 渲染三大分點焦點榜 (買+賣最多 / 買超最多 / 賣超最多) & 統計卡片
     function renderSummaryBadges() {
-      // 1. 當日買+賣最多 (Total Volume)
-      const byTotal = [...globalParentBrokers].sort((a, b) => b.totalLots - a.totalLots);
+      // 1. 當日買+賣最多 (Total Volume) 分點
+      const byTotal = [...globalBranchBrokers].sort((a, b) => b.totalLots - a.totalLots);
       const topTotal = byTotal.slice(0, 5);
 
-      // 2. 當日買超最多 (Net Buy)
-      const byBuyNet = [...globalParentBrokers].filter(b => b.netLots > 0).sort((a, b) => b.netLots - a.netLots);
+      // 2. 當日買超最多 (Net Buy) 分點
+      const byBuyNet = [...globalBranchBrokers].filter(b => b.netLots > 0).sort((a, b) => b.netLots - a.netLots);
       const topBuyers = byBuyNet.slice(0, 5);
 
-      // 3. 當日賣超最多 (Net Sell - 絕對值最大)
-      const bySellNet = [...globalParentBrokers].filter(b => b.netLots < 0).sort((a, b) => a.netLots - b.netLots);
+      // 3. 當日賣超最多 (Net Sell - 絕對值最大) 分點
+      const bySellNet = [...globalBranchBrokers].filter(b => b.netLots < 0).sort((a, b) => a.netLots - b.netLots);
       const topSellers = bySellNet.slice(0, 5);
 
       // 頂部統計指標
@@ -1044,16 +907,15 @@
       netElem.textContent = (netSum >= 0 ? '+' : '') + netSum.toLocaleString() + ' 張';
       netElem.className = `text-base font-bold num-tabular mt-0.5 ${netSum >= 0 ? 'text-rose-400' : 'text-emerald-400'}`;
 
-      // 榜單 1: 當日買+賣最多 (成交量換手榜)
-      const maxTotalLots = topTotal.length > 0 ? topTotal[0].totalLots : 1;
+      // 榜單 1: 當日買+賣最多 (分點成交量換手榜)
       document.getElementById('top-volume-list').innerHTML = topTotal.map((item, i) => {
         return `
           <div onclick="quickSearchBroker('${item.name}')" class="group p-1.5 rounded-lg bg-slate-900/50 hover:bg-slate-800/80 cursor-pointer transition border border-slate-800/50 hover:border-amber-500/40">
             <div class="flex items-center justify-between text-[11px] mb-1">
               <div class="flex items-center gap-1.5 truncate">
                 <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-extrabold ${i === 0 ? 'bg-amber-400 text-slate-950 shadow' : (i === 1 ? 'bg-slate-300 text-slate-950' : (i === 2 ? 'bg-amber-700 text-white' : 'bg-slate-800 text-slate-400'))}">${i + 1}</span>
+                <span class="font-bold text-indigo-300 text-[10px] font-mono">${item.code}</span>
                 <span class="font-bold text-white group-hover:text-amber-300 transition truncate">${item.name}</span>
-                <span class="text-[9px] px-1 py-0.2 rounded ${item.attr === '外資' ? 'bg-purple-500/20 text-purple-300' : 'bg-slate-800 text-slate-400'}">${item.attr}</span>
               </div>
               <div class="text-right num-tabular">
                 <span class="font-extrabold text-amber-300 text-xs">${Math.round(item.totalLots).toLocaleString()}</span>
@@ -1073,7 +935,7 @@
         `;
       }).join('') || '<div class="text-slate-500 text-center py-4 text-xs">暫無總量數據</div>';
 
-      // 榜單 2: 當日買最多 (買超吸籌榜)
+      // 榜單 2: 當日買最多 (分點買超吸籌榜)
       const maxBuyNet = topBuyers.length > 0 ? topBuyers[0].netLots : 1;
       document.getElementById('top-buyers-list').innerHTML = topBuyers.map((item, i) => {
         const barWidth = Math.min(100, Math.round((item.netLots / maxBuyNet) * 100));
@@ -1082,8 +944,8 @@
             <div class="flex items-center justify-between text-[11px] mb-1">
               <div class="flex items-center gap-1.5 truncate">
                 <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-extrabold ${i === 0 ? 'bg-rose-500 text-white shadow' : (i === 1 ? 'bg-rose-600/80 text-white' : (i === 2 ? 'bg-rose-700/80 text-white' : 'bg-slate-800 text-slate-400'))}">${i + 1}</span>
+                <span class="font-bold text-indigo-300 text-[10px] font-mono">${item.code}</span>
                 <span class="font-bold text-white group-hover:text-rose-300 transition truncate">${item.name}</span>
-                <span class="text-[9px] px-1 py-0.2 rounded ${item.attr === '外資' ? 'bg-purple-500/20 text-purple-300' : 'bg-slate-800 text-slate-400'}">${item.attr}</span>
               </div>
               <div class="text-right num-tabular">
                 <span class="font-extrabold text-rose-400 text-xs">+${Math.round(item.netLots).toLocaleString()}</span>
@@ -1099,9 +961,9 @@
             </div>
           </div>
         `;
-      }).join('') || '<div class="text-slate-500 text-center py-4 text-xs">今日無買超券商</div>';
+      }).join('') || '<div class="text-slate-500 text-center py-4 text-xs">今日無買超分點</div>';
 
-      // 榜單 3: 當日賣最多 (賣超倒貨榜)
+      // 榜單 3: 當日賣最多 (分點賣超倒貨榜)
       const maxSellNet = topSellers.length > 0 ? Math.abs(topSellers[0].netLots) : 1;
       document.getElementById('top-sellers-list').innerHTML = topSellers.map((item, i) => {
         const absNet = Math.abs(item.netLots);
@@ -1111,8 +973,8 @@
             <div class="flex items-center justify-between text-[11px] mb-1">
               <div class="flex items-center gap-1.5 truncate">
                 <span class="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-extrabold ${i === 0 ? 'bg-emerald-500 text-white shadow' : (i === 1 ? 'bg-emerald-600/80 text-white' : (i === 2 ? 'bg-emerald-700/80 text-white' : 'bg-slate-800 text-slate-400'))}">${i + 1}</span>
+                <span class="font-bold text-indigo-300 text-[10px] font-mono">${item.code}</span>
                 <span class="font-bold text-white group-hover:text-emerald-300 transition truncate">${item.name}</span>
-                <span class="text-[9px] px-1 py-0.2 rounded ${item.attr === '外資' ? 'bg-purple-500/20 text-purple-300' : 'bg-slate-800 text-slate-400'}">${item.attr}</span>
               </div>
               <div class="text-right num-tabular">
                 <span class="font-extrabold text-emerald-400 text-xs">-${Math.round(absNet).toLocaleString()}</span>
@@ -1128,14 +990,13 @@
             </div>
           </div>
         `;
-      }).join('') || '<div class="text-slate-500 text-center py-4 text-xs">今日無賣超券商</div>';
+      }).join('') || '<div class="text-slate-500 text-center py-4 text-xs">今日無賣超分點</div>';
     }
 
     // 快捷篩選切換 (買+賣最多 / 買超最多 / 賣超最多 / 純買進 / 純賣出)
     function setQuickFilter(mode) {
       currentQuickFilter = mode;
       
-      // 更新按鈕樣式
       const allBtns = ['all', 'total', 'buyNet', 'sellNet', 'buyGross', 'sellGross'];
       allBtns.forEach(m => {
         const btn = document.getElementById(`qf-${m}`);
@@ -1167,11 +1028,10 @@
         currentSortAsc = false;
       }
 
-      switchSubTab('parent');
-      renderAllBrokerTables();
+      switchSubTab('branch');
+      renderBranchTable();
 
-      // 平滑滾動至表格
-      const tableElem = document.getElementById('view-parent-table');
+      const tableElem = document.getElementById('view-branch-table');
       if (tableElem) {
         tableElem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
@@ -1186,7 +1046,7 @@
       currentQuickFilter = 'all';
       setQuickFilter('all');
       filterBrokerTable();
-      const tableElem = document.getElementById('view-parent-table');
+      const tableElem = document.getElementById('view-branch-table');
       if (tableElem) {
         tableElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -1195,16 +1055,19 @@
     // 視圖分頁切換
     function switchSubTab(subTab) {
       currentSubTab = subTab;
-      ['parent', 'branch', 'profile'].forEach(t => {
-        document.getElementById(`view-${t}-table`).classList.toggle('hidden', t !== subTab);
-        document.getElementById(`subtab-${t}`).classList.toggle('active', t === subTab);
+      ['branch', 'profile'].forEach(t => {
+        const tableElem = document.getElementById(`view-${t}-table`);
+        const btnElem = document.getElementById(`subtab-${t}`);
+        if (tableElem) tableElem.classList.toggle('hidden', t !== subTab);
+        if (btnElem) btnElem.classList.toggle('active', t === subTab);
       });
     }
 
     function sortBrokerTable(col) {
       const colMap = {
         'rank': 'netLots',
-        'code': 'key',
+        'code': 'code',
+        'name': 'name',
         'buy': 'buyLots',
         'sell': 'sellLots',
         'net': 'netLots',
@@ -1216,36 +1079,30 @@
         currentSortAsc = !currentSortAsc;
       } else {
         currentSortCol = actualCol;
-        currentSortAsc = false;
+        currentSortAsc = (actualCol === 'code' || actualCol === 'name') ? true : false;
       }
-      renderAllBrokerTables();
-    }
-
-    function filterBrokerTable() {
-      renderParentTable();
       renderBranchTable();
     }
 
-    function changeGroupMode(mode) {
-      currentGroupMode = mode;
-      loadSampleCSVData();
+    function filterBrokerTable() {
+      renderBranchTable();
     }
 
     // 匯出乾淨的 Excel 相容 CSV (帶 UTF-8 BOM，Excel 雙擊打開絕不亂碼)
     function exportCleanCSV() {
-      if (globalParentBrokers.length === 0) {
+      if (globalBranchBrokers.length === 0) {
         alert('請先載入或上傳分點資料！');
         return;
       }
-      let csv = '\uFEFF排名,分組碼,主券商,屬性,分點數,買進(張),賣出(張),買賣超(張),總量(張),買均價,賣均價,均價差\n';
-      const sorted = [...globalParentBrokers].sort((a, b) => b.netLots - a.netLots);
-      sorted.forEach((p, idx) => {
-        csv += `"${idx + 1}","${p.key}","${p.name}","${p.attr}","${p.branchCount}","${p.buyLots.toFixed(2)}","${p.sellLots.toFixed(2)}","${p.netLots.toFixed(2)}","${p.totalLots.toFixed(2)}","${p.buyAvg.toFixed(2)}","${p.sellAvg.toFixed(2)}","${p.diff.toFixed(2)}"\n`;
+      let csv = '\uFEFF排名,券商代號,分點名稱,買進(張),賣出(張),買賣超(張),總量(張),買均價,賣均價,均價差\n';
+      const sorted = [...globalBranchBrokers].sort((a, b) => b.netLots - a.netLots);
+      sorted.forEach((b, idx) => {
+        csv += `"${idx + 1}","${b.code}","${b.name}","${b.buyLots.toFixed(2)}","${b.sellLots.toFixed(2)}","${b.netLots.toFixed(2)}","${b.totalLots.toFixed(2)}","${b.buyAvg.toFixed(2)}","${b.sellAvg.toFixed(2)}","${b.diff.toFixed(2)}"\n`;
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `4971_主券商買賣超彙整_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.download = `4971_分點買賣超明細_${new Date().toISOString().slice(0, 10)}.csv`;
       link.click();
     }
 
